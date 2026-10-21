@@ -54,6 +54,19 @@ void main() {
     });
   });
 
+  group('PriceItemsRepository.search', () {
+    test('matches name and hides other businesses', () async {
+      final matches = await repository.search('composite', limit: 30);
+
+      expect(
+        matches.any((item) => item.name == 'Composite decking'),
+        isTrue,
+      );
+      expect(matches.length, lessThanOrEqualTo(30));
+      expect(matches.any((item) => item.name == 'Hourly labor'), isFalse);
+    });
+  });
+
   group('PriceItemsRepository.create', () {
     test('inserts an item that the next fetch returns', () async {
       final stamp = uniqueStamp();

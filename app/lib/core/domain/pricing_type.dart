@@ -47,4 +47,12 @@ enum PricingType {
   };
 
   String formatPrice(Money price) => '${price.format()} $suffix';
+
+  String get quantityUnit => switch (this) {
+    PricingType.fixed => '',
+    PricingType.perUnit => 'units',
+    PricingType.perSqFt => 'sq ft',
+    PricingType.perLinearFt => 'linear ft',
+    PricingType.perStep => 'steps',
+  };
 }

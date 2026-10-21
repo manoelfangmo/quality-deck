@@ -13,6 +13,12 @@ import 'package:app/core/domain/pricing_type.dart';
 import 'package:app/features/clients/domain/client.dart';
 import 'package:app/features/pricing/domain/price_item.dart';
 import 'package:app/features/pricing/domain/pricing_settings.dart';
+import 'package:app/core/domain/quantity.dart';
+import 'package:app/features/estimates/domain/job.dart';
+import 'package:app/features/estimates/domain/job_type.dart';
+import 'package:app/features/estimates/domain/job_with_lines.dart';
+import 'package:app/features/estimates/domain/labor.dart';
+import 'package:app/features/estimates/domain/line_item.dart';
 import 'package:app/features/projects/data/models.dart';
 import 'package:app/features/scheduling/domain/appointment.dart';
 import 'package:app/features/scheduling/domain/appointment_draft.dart';
@@ -252,6 +258,82 @@ final archivedMelgar = ProjectRow(
   clientName: anaMelgar.fullName,
   clientPhone: anaMelgar.phone,
   clientRemoved: false,
+);
+
+final compositeLine = LineItem(
+  id: 'line-composite',
+  jobId: 'job-back-deck',
+  position: 0,
+  isCustom: false,
+  priceItemId: compositeDecking.id,
+  name: 'Composite decking',
+  description: 'Trex Enhance, includes hidden fasteners',
+  pricingType: PricingType.perSqFt,
+  quantity: const Quantity(19250),
+  savedPrice: const Money(450),
+  total: const Money(86625),
+);
+
+final customHaulAway = LineItem(
+  id: 'line-haul',
+  jobId: 'job-back-deck',
+  position: 1,
+  isCustom: true,
+  name: 'Haul-away',
+  pricingType: PricingType.fixed,
+  quantity: const Quantity(100),
+  savedPrice: const Money(25000),
+  total: const Money(25000),
+);
+
+final overriddenRailing = LineItem(
+  id: 'line-railing',
+  jobId: 'job-back-deck',
+  position: 2,
+  isCustom: false,
+  priceItemId: aluminumRailing.id,
+  name: 'Aluminum railing',
+  description: 'Powder-coated, includes brackets',
+  pricingType: PricingType.perLinearFt,
+  quantity: const Quantity(4200),
+  savedPrice: const Money(3800),
+  overridePrice: const Money(3500),
+  total: const Money(147000),
+);
+
+final backDeckLabor = Labor(
+  hours: const Quantity(1250),
+  rate: const Money(6500),
+);
+
+final backDeckJob = Job(
+  id: 'job-back-deck',
+  projectId: 'project-melgar',
+  title: 'Back deck',
+  jobType: JobType.deck,
+  description: 'Replace rotted boards and railing',
+  labor: backDeckLabor,
+  createdAt: DateTime.utc(2026, 10, 17),
+  number: 1,
+);
+
+final frontStepsJob = Job(
+  id: 'job-front-steps',
+  projectId: 'project-melgar',
+  title: 'Front steps',
+  jobType: JobType.deck,
+  createdAt: DateTime.utc(2026, 10, 18),
+  number: 2,
+);
+
+final backDeckWithLines = JobWithLines(
+  job: backDeckJob,
+  lines: [compositeLine, customHaulAway, overriddenRailing],
+);
+
+final frontStepsWithLines = JobWithLines(
+  job: frontStepsJob,
+  lines: const [],
 );
 
 class FakeCurrentUser extends CurrentUser {

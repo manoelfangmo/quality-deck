@@ -8,6 +8,7 @@ abstract final class ProjectsTable {
   static const siteCity = 'site_city';
   static const siteState = 'site_state';
   static const siteZip = 'site_zip';
+  static const overheadBps = 'overhead_bps';
   static const archivedAt = 'archived_at';
   static const archivedBy = 'archived_by';
   static const createdBy = 'created_by';

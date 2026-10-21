@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
+import 'package:app/core/constants/breakpoints.dart';
 import 'package:app/core/routing/app_routes.dart';
 import 'package:app/core/utils/providers.dart';
 import 'package:app/core/utils/toasts.dart';
 import 'package:app/features/business/presentation/controllers/current_business.dart';
+import 'package:app/features/estimates/presentation/widgets/jobs_section.dart';
 import 'package:app/features/projects/data/models.dart';
 import 'package:app/features/projects/presentation/controllers/project.dart';
 import 'package:app/features/projects/presentation/controllers/project_actions.dart';
+import 'package:app/features/projects/presentation/widgets/project_app_bar_actions.dart';
 import 'package:app/features/projects/presentation/widgets/project_client_cell.dart';
+import 'package:app/features/projects/presentation/widgets/project_total_card.dart';
 
 class ProjectPage extends ConsumerWidget {
   const ProjectPage({required this.projectId, super.key});
@@ -86,51 +89,39 @@ class _ProjectBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final created = DateFormat('MMM d').format(row.createdAt);
+    final wide = MediaQuery.sizeOf(context).width >= Breakpoints.wide;
+    final archived = row.isArchived;
 
     return Scaffold(
-      appBar: AppBar(title: Text(row.title)),
+      appBar: AppBar(
+        title: Text(row.title),
+        actions: [ProjectAppBarActions(row: row)],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (row.isArchived) ...[
-            _ArchivedBanner(
-              onUnarchive: () => _unarchive(context, ref),
-            ),
+          if (archived) ...[
+            _ArchivedBanner(onUnarchive: () => _unarchive(context, ref)),
             const SizedBox(height: 16),
           ],
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Client', style: Theme.of(context).textTheme.labelLarge),
-                  const SizedBox(height: 8),
-                  ProjectClientCell(
-                    row: row,
-                    now: now,
-                    timeZone: timeZone,
-                    expanded: true,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(row.siteAddress.street),
-          Text(
-            '${row.siteAddress.city}, ${row.siteAddress.state} ${row.siteAddress.zip}',
-          ),
-          const SizedBox(height: 16),
-          Text('Created $created'),
+          if (wide)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _ClientCard(row: row, now: now, timeZone: timeZone)),
+                const SizedBox(width: 16),
+                Expanded(child: _SiteCard(row: row)),
+              ],
+            )
+          else ...[
+            _ClientCard(row: row, now: now, timeZone: timeZone),
+            const SizedBox(height: 16),
+            _SiteCard(row: row),
+          ],
           const SizedBox(height: 24),
-          Text(
-            'Project details are coming in a later update.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
+          JobsSection(projectId: row.id, readOnly: archived),
+          const SizedBox(height: 16),
+          ProjectTotalCard(row: row, readOnly: archived),
         ],
       ),
     );
@@ -152,6 +143,66 @@ class _ProjectBody extends ConsumerWidget {
       final message = ref.read(projectActionsControllerProvider(row.id)).errorMessage;
       if (message != null) AppSnackbars.show(context, message);
     }
+  }
+}
+
+class _ClientCard extends StatelessWidget {
+  const _ClientCard({
+    required this.row,
+    required this.now,
+    required this.timeZone,
+  });
+
+  final ProjectRow row;
+  final DateTime now;
+  final String timeZone;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Client', style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: 8),
+            ProjectClientCell(
+              row: row,
+              now: now,
+              timeZone: timeZone,
+              expanded: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SiteCard extends StatelessWidget {
+  const _SiteCard({required this.row});
+
+  final ProjectRow row;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Site', style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: 8),
+            Text(row.siteAddress.street),
+            Text(
+              '${row.siteAddress.city}, ${row.siteAddress.state} ${row.siteAddress.zip}',
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

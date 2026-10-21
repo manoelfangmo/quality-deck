@@ -10,6 +10,7 @@ import 'package:app/core/routing/app_routes.dart';
 import 'package:app/core/utils/providers.dart';
 import 'package:app/features/business/presentation/controllers/current_business.dart';
 import 'package:app/features/clients/data/clients_repository.dart';
+import 'package:app/features/estimates/data/jobs_repository.dart';
 import 'package:app/features/projects/data/projects_repository.dart';
 import 'package:app/features/projects/domain/project_view.dart';
 import 'package:app/features/projects/presentation/controllers/projects_table.dart';
@@ -22,12 +23,14 @@ import '../../../mocks.dart';
 void main() {
   late MockProjectsRepository projects;
   late MockClientsRepository clients;
+  late MockJobsRepository jobs;
 
   setUpAll(tzdata.initializeTimeZones);
 
   setUp(() {
     projects = MockProjectsRepository();
     clients = MockClientsRepository();
+    jobs = MockJobsRepository();
     when(projects.fetchAll(view: ProjectView.active)).thenAnswer(
       (_) async => [melgarOak, removedClientRow],
     );
@@ -38,6 +41,7 @@ void main() {
     when(clients.search(any, limit: anyNamed('limit'))).thenAnswer(
       (_) async => [anaMelgar],
     );
+    when(jobs.fetchForProject(any)).thenAnswer((_) async => []);
   });
 
   Future<GoRouter> pumpPage(WidgetTester tester) async {
@@ -70,6 +74,7 @@ void main() {
         overrides: [
           projectsRepositoryProvider.overrideWithValue(projects),
           clientsRepositoryProvider.overrideWithValue(clients),
+          jobsRepositoryProvider.overrideWithValue(jobs),
           currentBusinessProvider.overrideWith((ref) async => qualityDeck),
           clockProvider.overrideWithValue(
             Clock.fixed(DateTime.utc(2026, 10, 20, 18)),

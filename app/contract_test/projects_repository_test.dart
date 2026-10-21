@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:app/core/domain/app_exception.dart';
+import 'package:app/core/domain/percent.dart';
 import 'package:app/features/clients/data/clients_repository.dart';
 import 'package:app/features/projects/data/models.dart';
 import 'package:app/features/projects/data/projects_repository.dart';
@@ -89,6 +90,7 @@ void main() {
       expect(row.clientRemoved, isFalse);
       expect(row.appointmentStartsAt, isNotNull);
       expect(row.siteAddress.city, 'Bowie');
+      expect(row.overhead, const Percent(1250));
     });
 
     test('marks a removed client and hides their appointment', () async {
@@ -126,6 +128,73 @@ void main() {
       expect(fetched.siteAddress.state, 'MD');
       expect(fetched.isArchived, isFalse);
       expect(fetched.clientId, client.id);
+    });
+  });
+
+  group('ProjectsRepository.update', () {
+    test('persists title and site on the next fetch', () async {
+      final created = await createUniqueProject(
+        projects: repository,
+        clients: clients,
+      );
+      cleanup.trackClient(created.clientId);
+      cleanup.trackProject(created.projectId);
+      final stamp = uniqueStamp();
+
+      await repository.update(
+        UpdateProjectCommand(
+          id: created.projectId,
+          title: '  CT Edited $stamp  ',
+          siteStreet: '  88 Pine St  ',
+          siteCity: '  Bowie  ',
+          siteState: 'md',
+          siteZip: '20715',
+        ),
+      );
+
+      final fetched = await repository.fetchOne(created.projectId);
+      expect(fetched, isNotNull);
+      expect(fetched!.title, 'CT Edited $stamp');
+      expect(fetched.siteAddress.street, '88 Pine St');
+      expect(fetched.siteAddress.city, 'Bowie');
+      expect(fetched.siteAddress.state, 'MD');
+      expect(fetched.siteAddress.zip, '20715');
+    });
+  });
+
+  group('ProjectsRepository.setOverhead', () {
+    test('sets and clears overhead on the next fetch', () async {
+      final created = await createUniqueProject(
+        projects: repository,
+        clients: clients,
+      );
+      cleanup.trackClient(created.clientId);
+      cleanup.trackProject(created.projectId);
+
+      await repository.setOverhead(created.projectId, const Percent(1250));
+      var fetched = await repository.fetchOne(created.projectId);
+      expect(fetched!.overhead, const Percent(1250));
+
+      await repository.setOverhead(created.projectId, null);
+      fetched = await repository.fetchOne(created.projectId);
+      expect(fetched!.overhead, isNull);
+    });
+
+    test('raises project_archived when the project is archived', () async {
+      final created = await createUniqueProject(
+        projects: repository,
+        clients: clients,
+      );
+      cleanup.trackClient(created.clientId);
+      cleanup.trackProject(created.projectId);
+      await repository.archive(created.projectId);
+
+      try {
+        await repository.setOverhead(created.projectId, const Percent(1250));
+        fail('expected AppException');
+      } on AppException catch (error) {
+        expect(error.token, 'project_archived');
+      }
     });
   });
 

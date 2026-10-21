@@ -1,6 +1,7 @@
 import 'package:app/core/database/project_rows_view.dart';
 import 'package:app/core/database/rpc.dart';
 import 'package:app/core/domain/address.dart';
+import 'package:app/core/domain/percent.dart';
 import 'package:app/core/utils/json_converters.dart';
 
 class ProjectPage {
@@ -44,6 +45,7 @@ class ProjectRow {
     required this.createdAt,
     this.archivedAt,
     required this.siteAddress,
+    this.overhead,
     required this.clientId,
     required this.clientName,
     this.clientPhone,
@@ -57,6 +59,7 @@ class ProjectRow {
   final DateTime createdAt;
   final DateTime? archivedAt;
   final Address siteAddress;
+  final Percent? overhead;
   final String clientId;
   final String clientName;
   final String? clientPhone;
@@ -83,6 +86,7 @@ class ProjectRow {
         state: json[ProjectRowsView.siteState] as String,
         zip: json[ProjectRowsView.siteZip] as String,
       ),
+      overhead: _overhead(json[ProjectRowsView.overheadBps]),
       clientId: json[ProjectRowsView.clientId] as String,
       clientName: json[ProjectRowsView.clientName] as String,
       clientPhone: json[ProjectRowsView.clientPhone] as String?,
@@ -94,4 +98,36 @@ class ProjectRow {
           json[ProjectRowsView.appointmentDurationMinutes] as int?,
     );
   }
+}
+
+Percent? _overhead(Object? value) {
+  if (value == null) return null;
+  return Percent(value as int);
+}
+
+class UpdateProjectCommand {
+  const UpdateProjectCommand({
+    required this.id,
+    required this.title,
+    required this.siteStreet,
+    required this.siteCity,
+    required this.siteState,
+    required this.siteZip,
+  });
+
+  final String id;
+  final String title;
+  final String siteStreet;
+  final String siteCity;
+  final String siteState;
+  final String siteZip;
+
+  Map<String, dynamic> toJson() => {
+    Rpc.pId: id,
+    Rpc.pTitle: title.trim(),
+    Rpc.pSiteStreet: siteStreet.trim(),
+    Rpc.pSiteCity: siteCity.trim(),
+    Rpc.pSiteState: siteState.trim().toUpperCase(),
+    Rpc.pSiteZip: siteZip.trim(),
+  };
 }

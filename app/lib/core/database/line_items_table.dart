@@ -1,0 +1,19 @@
+abstract final class LineItemsTable {
+  static const name = 'line_items';
+  static const id = 'id';
+  static const businessId = 'business_id';
+  static const jobId = 'job_id';
+  static const position = 'position';
+  static const isCustom = 'is_custom';
+  static const priceItemId = 'price_item_id';
+  static const itemName = 'name';
+  static const description = 'description';
+  static const pricingType = 'pricing_type';
+  static const quantity = 'quantity';
+  static const savedPriceCents = 'saved_price_cents';
+  static const overridePriceCents = 'override_price_cents';
+  static const totalCents = 'total_cents';
+  static const createdBy = 'created_by';
+  static const createdAt = 'created_at';
+  static const updatedAt = 'updated_at';
+}

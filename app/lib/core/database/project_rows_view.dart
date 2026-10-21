@@ -14,4 +14,5 @@ abstract final class ProjectRowsView {
   static const clientRemoved = 'client_removed';
   static const appointmentStartsAt = 'appointment_starts_at';
   static const appointmentDurationMinutes = 'appointment_duration_minutes';
+  static const overheadBps = 'overhead_bps';
 }

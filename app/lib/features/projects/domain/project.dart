@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:app/core/database/projects_table.dart';
 import 'package:app/core/domain/address.dart';
+import 'package:app/core/domain/percent.dart';
 import 'package:app/core/utils/json_converters.dart';
 
 part 'project.freezed.dart';
@@ -15,6 +16,7 @@ abstract class Project with _$Project {
     required String clientId,
     required String title,
     required Address siteAddress,
+    Percent? overhead,
     DateTime? archivedAt,
     required DateTime createdAt,
   }) = _Project;
@@ -30,6 +32,7 @@ abstract class Project with _$Project {
         state: json[ProjectsTable.siteState] as String,
         zip: json[ProjectsTable.siteZip] as String,
       ),
+      overhead: _percent(json[ProjectsTable.overheadBps]),
       archivedAt: const UtcToLocalNullableConverter().fromJson(
         json[ProjectsTable.archivedAt] as String?,
       ),
@@ -40,4 +43,9 @@ abstract class Project with _$Project {
   }
 
   bool get isArchived => archivedAt != null;
+}
+
+Percent? _percent(Object? value) {
+  if (value == null) return null;
+  return Percent(value as int);
 }

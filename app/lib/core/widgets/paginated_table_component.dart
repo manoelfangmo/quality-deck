@@ -264,7 +264,7 @@ class _PaginatedTableComponentState<T extends Object>
                           borderRadius: BorderRadius.circular(14),
                         ),
                         dataRowColor: WidgetStateProperty.all(
-                          darker(colorScheme.surface, 0.3),
+                          colorScheme.surface,
                         ),
                         headingRowColor: WidgetStateProperty.all(
                           context.colors.onSurface.withValues(alpha: 0.1),
@@ -315,8 +315,8 @@ class _PaginatedTableComponentState<T extends Object>
                                 : () => widget.onLongPress!(data),
                             color: WidgetStateProperty.all<Color?>(
                               hoveredRowIndex == index
-                                  ? darker(colorScheme.surface, 0.0)
-                                  : darker(colorScheme.surface, 0.3),
+                                  ? colorScheme.surface.withValues(alpha: 0.0)
+                                  : colorScheme.surface.withValues(alpha: 0.3),
                             ),
                             cells: <DataCell>[
                               ...List<DataCell>.generate(

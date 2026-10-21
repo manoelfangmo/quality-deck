@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Project {
 
- String get id; String get clientId; String get title; Address get siteAddress; DateTime? get archivedAt; DateTime get createdAt;
+ String get id; String get clientId; String get title; Address get siteAddress; Percent? get overhead; DateTime? get archivedAt; DateTime get createdAt;
 /// Create a copy of Project
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $ProjectCopyWith<Project> get copyWith => _$ProjectCopyWithImpl<Project>(this as
 @override
 bool operator ==(Object other) {
   final _this = this as Project;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Project&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.clientId, _this.clientId) || other.clientId == _this.clientId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.siteAddress, _this.siteAddress) || other.siteAddress == _this.siteAddress)&&(identical(other.archivedAt, _this.archivedAt) || other.archivedAt == _this.archivedAt)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Project&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.clientId, _this.clientId) || other.clientId == _this.clientId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.siteAddress, _this.siteAddress) || other.siteAddress == _this.siteAddress)&&(identical(other.overhead, _this.overhead) || other.overhead == _this.overhead)&&(identical(other.archivedAt, _this.archivedAt) || other.archivedAt == _this.archivedAt)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Project;
-  return Object.hash(runtimeType,_this.id,_this.clientId,_this.title,_this.siteAddress,_this.archivedAt,_this.createdAt);
+  return Object.hash(runtimeType,_this.id,_this.clientId,_this.title,_this.siteAddress,_this.overhead,_this.archivedAt,_this.createdAt);
 }
 
 @override
 String toString() {
   final _this = this as Project;
-  return 'Project(id: ${_this.id}, clientId: ${_this.clientId}, title: ${_this.title}, siteAddress: ${_this.siteAddress}, archivedAt: ${_this.archivedAt}, createdAt: ${_this.createdAt})';
+  return 'Project(id: ${_this.id}, clientId: ${_this.clientId}, title: ${_this.title}, siteAddress: ${_this.siteAddress}, overhead: ${_this.overhead}, archivedAt: ${_this.archivedAt}, createdAt: ${_this.createdAt})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $ProjectCopyWith<$Res>  {
   factory $ProjectCopyWith(Project value, $Res Function(Project) _then) = _$ProjectCopyWithImpl;
 @useResult
 $Res call({
- String id, String clientId, String title, Address siteAddress, DateTime? archivedAt, DateTime createdAt
+ String id, String clientId, String title, Address siteAddress, Percent? overhead, DateTime? archivedAt, DateTime createdAt
 });
 
 
@@ -68,13 +68,14 @@ class _$ProjectCopyWithImpl<$Res>
 
 /// Create a copy of Project
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? clientId = null,Object? title = null,Object? siteAddress = null,Object? archivedAt = freezed,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? clientId = null,Object? title = null,Object? siteAddress = null,Object? overhead = freezed,Object? archivedAt = freezed,Object? createdAt = null,}) {
   return _then(Project(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,clientId: null == clientId ? _self.clientId : clientId // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,siteAddress: null == siteAddress ? _self.siteAddress : siteAddress // ignore: cast_nullable_to_non_nullable
-as Address,archivedAt: freezed == archivedAt ? _self.archivedAt : archivedAt // ignore: cast_nullable_to_non_nullable
+as Address,overhead: freezed == overhead ? _self.overhead : overhead // ignore: cast_nullable_to_non_nullable
+as Percent?,archivedAt: freezed == archivedAt ? _self.archivedAt : archivedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
@@ -170,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String clientId,  String title,  Address siteAddress,  DateTime? archivedAt,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String clientId,  String title,  Address siteAddress,  Percent? overhead,  DateTime? archivedAt,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Project() when $default != null:
-return $default(_that.id,_that.clientId,_that.title,_that.siteAddress,_that.archivedAt,_that.createdAt);case _:
+return $default(_that.id,_that.clientId,_that.title,_that.siteAddress,_that.overhead,_that.archivedAt,_that.createdAt);case _:
   return orElse();
 
 }
@@ -191,10 +192,10 @@ return $default(_that.id,_that.clientId,_that.title,_that.siteAddress,_that.arch
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String clientId,  String title,  Address siteAddress,  DateTime? archivedAt,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String clientId,  String title,  Address siteAddress,  Percent? overhead,  DateTime? archivedAt,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _Project():
-return $default(_that.id,_that.clientId,_that.title,_that.siteAddress,_that.archivedAt,_that.createdAt);case _:
+return $default(_that.id,_that.clientId,_that.title,_that.siteAddress,_that.overhead,_that.archivedAt,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +212,10 @@ return $default(_that.id,_that.clientId,_that.title,_that.siteAddress,_that.arch
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String clientId,  String title,  Address siteAddress,  DateTime? archivedAt,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String clientId,  String title,  Address siteAddress,  Percent? overhead,  DateTime? archivedAt,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Project() when $default != null:
-return $default(_that.id,_that.clientId,_that.title,_that.siteAddress,_that.archivedAt,_that.createdAt);case _:
+return $default(_that.id,_that.clientId,_that.title,_that.siteAddress,_that.overhead,_that.archivedAt,_that.createdAt);case _:
   return null;
 
 }
@@ -226,13 +227,14 @@ return $default(_that.id,_that.clientId,_that.title,_that.siteAddress,_that.arch
 
 
 class _Project extends Project {
-  const _Project({required this.id, required this.clientId, required this.title, required this.siteAddress, this.archivedAt, required this.createdAt}): super._();
+  const _Project({required this.id, required this.clientId, required this.title, required this.siteAddress, this.overhead, this.archivedAt, required this.createdAt}): super._();
   
 
 @override final  String id;
 @override final  String clientId;
 @override final  String title;
 @override final  Address siteAddress;
+@override final  Percent? overhead;
 @override final  DateTime? archivedAt;
 @override final  DateTime createdAt;
 
@@ -246,18 +248,18 @@ _$ProjectCopyWith<_Project> get copyWith => __$ProjectCopyWithImpl<_Project>(thi
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Project&&(identical(other.id, id) || other.id == id)&&(identical(other.clientId, clientId) || other.clientId == clientId)&&(identical(other.title, title) || other.title == title)&&(identical(other.siteAddress, siteAddress) || other.siteAddress == siteAddress)&&(identical(other.archivedAt, archivedAt) || other.archivedAt == archivedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Project&&(identical(other.id, id) || other.id == id)&&(identical(other.clientId, clientId) || other.clientId == clientId)&&(identical(other.title, title) || other.title == title)&&(identical(other.siteAddress, siteAddress) || other.siteAddress == siteAddress)&&(identical(other.overhead, overhead) || other.overhead == overhead)&&(identical(other.archivedAt, archivedAt) || other.archivedAt == archivedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,clientId,title,siteAddress,archivedAt,createdAt);
+    return Object.hash(runtimeType,id,clientId,title,siteAddress,overhead,archivedAt,createdAt);
 }
 
 @override
 String toString() {
-    return 'Project(id: $id, clientId: $clientId, title: $title, siteAddress: $siteAddress, archivedAt: $archivedAt, createdAt: $createdAt)';
+    return 'Project(id: $id, clientId: $clientId, title: $title, siteAddress: $siteAddress, overhead: $overhead, archivedAt: $archivedAt, createdAt: $createdAt)';
 }
 
 
@@ -268,7 +270,7 @@ abstract mixin class _$ProjectCopyWith<$Res> implements $ProjectCopyWith<$Res> {
   factory _$ProjectCopyWith(_Project value, $Res Function(_Project) _then) = __$ProjectCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String clientId, String title, Address siteAddress, DateTime? archivedAt, DateTime createdAt
+ String id, String clientId, String title, Address siteAddress, Percent? overhead, DateTime? archivedAt, DateTime createdAt
 });
 
 
@@ -285,13 +287,14 @@ class __$ProjectCopyWithImpl<$Res>
 
 /// Create a copy of Project
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? clientId = null,Object? title = null,Object? siteAddress = null,Object? archivedAt = freezed,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? clientId = null,Object? title = null,Object? siteAddress = null,Object? overhead = freezed,Object? archivedAt = freezed,Object? createdAt = null,}) {
   return _then(_Project(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,clientId: null == clientId ? _self.clientId : clientId // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,siteAddress: null == siteAddress ? _self.siteAddress : siteAddress // ignore: cast_nullable_to_non_nullable
-as Address,archivedAt: freezed == archivedAt ? _self.archivedAt : archivedAt // ignore: cast_nullable_to_non_nullable
+as Address,overhead: freezed == overhead ? _self.overhead : overhead // ignore: cast_nullable_to_non_nullable
+as Percent?,archivedAt: freezed == archivedAt ? _self.archivedAt : archivedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));

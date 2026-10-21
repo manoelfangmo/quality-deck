@@ -8,6 +8,8 @@ import 'package:app/features/auth/data/auth_repository.dart';
 import 'package:app/features/clients/data/clients_repository.dart';
 import 'package:app/features/clients/data/models.dart';
 import 'package:app/features/clients/domain/client.dart';
+import 'package:app/features/projects/data/models.dart';
+import 'package:app/features/projects/data/projects_repository.dart';
 
 import 'test_env.dart';
 
@@ -50,6 +52,23 @@ abstract final class SeedProjects {
   static const jamesPineId = '00000000-0000-4000-8000-000000000403';
   static const removedClientProjectId = '00000000-0000-4000-8000-000000000406';
   static const archivedBarkerId = '00000000-0000-4000-8000-000000000426';
+  static const otherCoProjectId = '00000000-0000-4000-8000-000000000441';
+}
+
+abstract final class SeedJobs {
+  static const backDeckId = '00000000-0000-4000-8000-000000000501';
+  static const frontStepsId = '00000000-0000-4000-8000-000000000502';
+}
+
+abstract final class SeedLineItems {
+  static const compositeId = '00000000-0000-4000-8000-000000000601';
+  static const deletedPriceItemLineId = '00000000-0000-4000-8000-000000000606';
+}
+
+abstract final class SeedPriceItems {
+  static const compositeDeckingId = '00000000-0000-4000-8000-000000000305';
+  static const demoExistingDeckId = '00000000-0000-4000-8000-000000000306';
+  static const otherCoHourlyLaborId = '00000000-0000-4000-8000-000000000341';
 }
 
 abstract final class SeedInvites {
@@ -152,6 +171,33 @@ Future<Client> createUniqueClient(ClientsRepository repository) {
       phone: '3015550100',
     ),
   );
+}
+
+class UniqueProject {
+  const UniqueProject({required this.clientId, required this.projectId});
+
+  final String clientId;
+  final String projectId;
+}
+
+/// Creates a client and an active project. The caller must track both ids.
+Future<UniqueProject> createUniqueProject({
+  required ProjectsRepository projects,
+  required ClientsRepository clients,
+}) async {
+  final client = await createUniqueClient(clients);
+  final stamp = uniqueStamp();
+  final id = await projects.create(
+    CreateProjectCommand(
+      clientId: client.id,
+      title: 'CT Project $stamp',
+      siteStreet: '1 Oak St',
+      siteCity: 'Bowie',
+      siteState: 'MD',
+      siteZip: '20715',
+    ),
+  );
+  return UniqueProject(clientId: client.id, projectId: id);
 }
 
 void expectSameUtcParts(DateTime actual, DateTime expected) {

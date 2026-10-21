@@ -11,6 +11,13 @@ abstract final class Rpc {
   static const createProject = 'create_project';
   static const archiveProject = 'archive_project';
   static const unarchiveProject = 'unarchive_project';
+  static const addPriceListLine = 'add_price_list_line';
+  static const addCustomLine = 'add_custom_line';
+  static const updateLine = 'update_line';
+  static const reorderLines = 'reorder_lines';
+  static const deleteLine = 'delete_line';
+  static const updateProject = 'update_project';
+  static const setProjectOverhead = 'set_project_overhead';
 
   static const pName = 'p_name';
   static const pCode = 'p_code';
@@ -27,4 +34,13 @@ abstract final class Rpc {
   static const pSiteState = 'p_site_state';
   static const pSiteZip = 'p_site_zip';
   static const pProjectId = 'p_project_id';
+  static const pJobId = 'p_job_id';
+  static const pPriceItemId = 'p_price_item_id';
+  static const pQuantity = 'p_quantity';
+  static const pDescription = 'p_description';
+  static const pPricingType = 'p_pricing_type';
+  static const pPriceCents = 'p_price_cents';
+  static const pOverridePriceCents = 'p_override_price_cents';
+  static const pIds = 'p_ids';
+  static const pOverheadBps = 'p_overhead_bps';
 }

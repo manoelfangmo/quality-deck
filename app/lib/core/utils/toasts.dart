@@ -11,12 +11,14 @@ abstract final class AppSnackbars {
     BuildContext context,
     String message, {
     required VoidCallback onUndo,
+    Duration duration = const Duration(seconds: 4),
   }) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: Text(message),
+          duration: duration,
           action: SnackBarAction(label: 'Undo', onPressed: onUndo),
         ),
       );

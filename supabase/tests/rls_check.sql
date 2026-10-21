@@ -54,10 +54,30 @@ declare
   qd_removed_client_project uuid := '00000000-0000-4000-8000-000000000406';
   qd_archived_id uuid := '00000000-0000-4000-8000-000000000426';
   other_project_id uuid := '00000000-0000-4000-8000-000000000441';
+  qd_job_id uuid := '00000000-0000-4000-8000-000000000501';
+  qd_job_no_labor uuid := '00000000-0000-4000-8000-000000000503';
+  qd_archived_job uuid := '00000000-0000-4000-8000-000000000510';
+  other_job_id uuid := '00000000-0000-4000-8000-000000000511';
+  qd_line_id uuid := '00000000-0000-4000-8000-000000000601';
+  qd_custom_line uuid := '00000000-0000-4000-8000-000000000603';
+  qd_deleted_item_line uuid := '00000000-0000-4000-8000-000000000606';
+  other_line_id uuid := '00000000-0000-4000-8000-000000000640';
+  qd_composite_item uuid := '00000000-0000-4000-8000-000000000305';
   v_count int;
   v_id uuid;
+  v_id2 uuid;
   v_labor bigint;
   v_overhead int;
+  v_total bigint;
+  v_name text;
+  v_desc text;
+  v_type public.pricing_type;
+  v_price bigint;
+  v_qty numeric;
+  v_item_id uuid;
+  v_rate bigint;
+  v_hours numeric;
+  v_positions uuid[];
   v_role public.user_role;
   v_session_id uuid;
   v_deleted_at timestamptz;
@@ -840,6 +860,446 @@ begin
     when check_violation then null;
   end;
 
+  -- Jobs / line items: isolation, RPCs, copied prices, totals, labor, overhead.
+  perform public._test_as_user(other_id);
+  select count(*) into v_count from public.jobs;
+  assert v_count = 1, 'Other Co should see only its own job';
+  assert not exists (select 1 from public.jobs where id = qd_job_id),
+    'Other Co must not see Quality Deck jobs';
+  select count(*) into v_count from public.line_items;
+  assert v_count = 2, 'Other Co should see only its own line items';
+  assert not exists (select 1 from public.line_items where id = qd_line_id),
+    'Other Co must not see Quality Deck line items';
+
+  begin
+    insert into public.jobs (project_id, title, job_type)
+    values (qd_project_id, 'Sneaky', 'deck');
+    raise exception 'Other Co insert into Quality Deck jobs should fail';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  update public.jobs set title = 'Hacked' where id = qd_job_id;
+  get diagnostics v_count = row_count;
+  assert v_count = 0, 'Other Co must not update Quality Deck jobs';
+
+  delete from public.jobs where id = qd_job_id;
+  get diagnostics v_count = row_count;
+  assert v_count = 0, 'Other Co must not delete Quality Deck jobs';
+
+  begin
+    perform public.add_custom_line(
+      qd_job_id, 'Nope', null, 'fixed', 1, 100
+    );
+    raise exception 'Other Co add_custom_line on Quality Deck should fail';
+  exception
+    when sqlstate 'Q0074' then null;
+  end;
+
+  begin
+    perform public.update_line(qd_line_id, 10, null, null, null, null, null);
+    raise exception 'Other Co update_line on Quality Deck should fail';
+  exception
+    when sqlstate 'Q0075' then null;
+  end;
+
+  begin
+    perform public.reorder_lines(qd_job_id, array[qd_line_id]);
+    raise exception 'Other Co reorder_lines on Quality Deck should fail';
+  exception
+    when sqlstate 'Q0074' then null;
+  end;
+
+  begin
+    perform public.delete_line(qd_line_id);
+    raise exception 'Other Co delete_line on Quality Deck should fail';
+  exception
+    when sqlstate 'Q0075' then null;
+  end;
+
+  begin
+    perform public.add_price_list_line(other_job_id, qd_item_id, 1);
+    raise exception 'add_price_list_line with another business item should fail';
+  exception
+    when sqlstate 'Q0060' then null;
+  end;
+
+  perform public._test_as_user(owner_id);
+  select count(*) into v_count from public.jobs;
+  assert v_count = 10, 'owner should see 10 Quality Deck jobs';
+  assert not exists (select 1 from public.jobs where id = other_job_id),
+    'owner must not see Other Co jobs';
+  assert not exists (select 1 from public.line_items where id = other_line_id),
+    'owner must not see Other Co line items';
+
+  -- Archived project: writes raise Q0073; after unarchive they work.
+  begin
+    insert into public.jobs (project_id, title, job_type)
+    values (qd_archived_id, 'No', 'deck');
+    get diagnostics v_count = row_count;
+    if v_count > 0 then
+      raise exception 'insert job on archived project should change no rows';
+    end if;
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  update public.jobs set title = 'No' where id = qd_archived_job;
+  get diagnostics v_count = row_count;
+  assert v_count = 0, 'update job on archived project should change no rows';
+
+  delete from public.jobs where id = qd_archived_job;
+  get diagnostics v_count = row_count;
+  assert v_count = 0, 'delete job on archived project should change no rows';
+
+  begin
+    perform public.add_custom_line(
+      qd_archived_job, 'No', null, 'fixed', 1, 100
+    );
+    raise exception 'add_custom_line on archived should fail';
+  exception
+    when sqlstate 'Q0073' then null;
+  end;
+
+  begin
+    perform public.update_line(
+      '00000000-0000-4000-8000-000000000635',
+      10, null, null, null, null, null
+    );
+    raise exception 'update_line on archived should fail';
+  exception
+    when sqlstate 'Q0073' then null;
+  end;
+
+  begin
+    perform public.reorder_lines(
+      qd_archived_job,
+      array[
+        '00000000-0000-4000-8000-000000000635'::uuid,
+        '00000000-0000-4000-8000-000000000636'::uuid,
+        '00000000-0000-4000-8000-000000000637'::uuid
+      ]
+    );
+    raise exception 'reorder_lines on archived should fail';
+  exception
+    when sqlstate 'Q0073' then null;
+  end;
+
+  begin
+    perform public.delete_line('00000000-0000-4000-8000-000000000637');
+    raise exception 'delete_line on archived should fail';
+  exception
+    when sqlstate 'Q0073' then null;
+  end;
+
+  begin
+    perform public.update_project(
+      qd_archived_id, 'No', '1 Oak St', 'Bowie', 'MD', '20715'
+    );
+    raise exception 'update_project on archived should fail';
+  exception
+    when sqlstate 'Q0073' then null;
+  end;
+
+  begin
+    perform public.set_project_overhead(qd_archived_id, 1000);
+    raise exception 'set_project_overhead on archived should fail';
+  exception
+    when sqlstate 'Q0073' then null;
+  end;
+
+  perform public.unarchive_project(qd_archived_id);
+  v_id := public.add_custom_line(
+    qd_archived_job, 'Temp', null, 'fixed', 1, 100
+  );
+  assert v_id is not null, 'add_custom_line after unarchive should succeed';
+  perform public.delete_line(v_id);
+  perform public.archive_project(qd_archived_id);
+
+  -- Direct insert / update / delete on line_items fails.
+  begin
+    insert into public.line_items (
+      job_id, position, is_custom, name, pricing_type, quantity, saved_price_cents
+    ) values (
+      qd_job_id, 99, true, 'Direct', 'fixed', 1, 100
+    );
+    raise exception 'direct line_items insert should fail';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  begin
+    update public.line_items set name = 'Hacked' where id = qd_line_id;
+    raise exception 'direct line_items update should fail';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  begin
+    delete from public.line_items where id = qd_custom_line;
+    raise exception 'direct line_items delete should fail';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  -- add_price_list_line copies; later edits / deletes leave the line.
+  v_id := public.add_price_list_line(qd_job_no_labor, qd_composite_item, 10);
+  select name, description, pricing_type, saved_price_cents, quantity, price_item_id
+  into v_name, v_desc, v_type, v_price, v_qty, v_item_id
+  from public.line_items
+  where id = v_id;
+  assert v_name = 'Composite decking', 'copied name';
+  assert v_desc is not null, 'copied description';
+  assert v_type = 'per_sq_ft', 'copied pricing type';
+  assert v_price = 450, 'copied price';
+  assert v_qty = 10, 'quantity stored';
+  assert v_item_id = qd_composite_item, 'price_item_id set';
+
+  update public.price_items
+  set name = 'Changed', description = 'Changed', price_cents = 999
+  where id = qd_composite_item;
+  select name, description, saved_price_cents
+  into v_name, v_desc, v_price
+  from public.line_items
+  where id = v_id;
+  assert v_name = 'Composite decking', 'editing a price item must not change the line name';
+  assert v_desc is distinct from 'Changed', 'editing a price item must not change the line description';
+  assert v_price = 450, 'editing a price item must not change the saved price';
+
+  delete from public.price_items where id = qd_composite_item;
+  select name, saved_price_cents, price_item_id
+  into v_name, v_price, v_item_id
+  from public.line_items
+  where id = v_id;
+  assert v_name = 'Composite decking', 'deleting a price item must not change the line name';
+  assert v_price = 450, 'deleting a price item must not change the saved price';
+  assert v_item_id is null, 'deleting a price item should set price_item_id to null';
+
+  -- Seeded line whose item was deleted already has a null price_item_id.
+  assert (
+    select price_item_id from public.line_items where id = qd_deleted_item_line
+  ) is null, 'seeded deleted-item line should have a null price_item_id';
+  assert (
+    select name from public.line_items where id = qd_deleted_item_line
+  ) = 'Old fascia', 'seeded deleted-item line should keep its copied name';
+
+  -- Restore the composite item so later assertions about the 25-item list
+  -- are not needed; this script rolls back anyway.
+  insert into public.price_items (
+    id, name, description, pricing_type, price_cents
+  ) values (
+    qd_composite_item, 'Composite decking', 'restored', 'per_sq_ft', 450
+  );
+
+  -- Fixed lines always have quantity 1.
+  v_id := public.add_price_list_line(
+    qd_job_no_labor, '00000000-0000-4000-8000-000000000306', 99
+  );
+  assert (
+    select quantity from public.line_items where id = v_id
+  ) = 1, 'fixed price-list line quantity should be 1';
+  v_id2 := public.add_custom_line(
+    qd_job_no_labor, 'Fixed custom', null, 'fixed', 50, 1000
+  );
+  assert (
+    select quantity from public.line_items where id = v_id2
+  ) = 1, 'fixed custom line quantity should be 1';
+
+  -- update_line field_locked.
+  begin
+    perform public.update_line(
+      qd_line_id, 192.5, null, null, 'New name', null, null
+    );
+    raise exception 'price-list update with a name should fail';
+  exception
+    when sqlstate 'Q0077' then null;
+  end;
+
+  begin
+    perform public.update_line(
+      qd_line_id, 192.5, null, null, null, 'fixed', null
+    );
+    raise exception 'price-list update with a type should fail';
+  exception
+    when sqlstate 'Q0077' then null;
+  end;
+
+  begin
+    perform public.update_line(
+      qd_line_id, 192.5, null, null, null, null, 100
+    );
+    raise exception 'price-list update with a price should fail';
+  exception
+    when sqlstate 'Q0077' then null;
+  end;
+
+  begin
+    perform public.update_line(
+      qd_custom_line, 1, null, 100, 'Haul-away', 'fixed', 25000
+    );
+    raise exception 'custom update with an override should fail';
+  exception
+    when sqlstate 'Q0077' then null;
+  end;
+
+  -- total_cents rounding cases.
+  v_id := public.add_custom_line(
+    qd_job_no_labor, 'A', null, 'per_sq_ft', 192.5, 450
+  );
+  assert (
+    select total_cents from public.line_items where id = v_id
+  ) = 86625, '192.5 × $4.50 should be $866.25';
+
+  v_id := public.add_custom_line(
+    qd_job_no_labor, 'B', null, 'per_unit', 3, 33
+  );
+  assert (
+    select total_cents from public.line_items where id = v_id
+  ) = 99, '3 × $0.33 should be $0.99';
+
+  v_id := public.add_custom_line(
+    qd_job_no_labor, 'C', null, 'per_unit', 1.25, 1
+  );
+  assert (
+    select total_cents from public.line_items where id = v_id
+  ) = 1, '1.25 × $0.01 should be $0.01';
+
+  v_id := public.add_price_list_line(
+    qd_job_no_labor, '00000000-0000-4000-8000-000000000301', 10
+  );
+  perform public.update_line(v_id, 10, null, 3000, null, null, null);
+  assert (
+    select total_cents from public.line_items where id = v_id
+  ) = 30000, 'override price should be used in total_cents';
+
+  -- reorder_lines mismatch changes nothing; a valid reorder sticks.
+  select array_agg(id order by position) into v_positions
+  from public.line_items
+  where job_id = qd_job_id;
+
+  begin
+    perform public.reorder_lines(qd_job_id, v_positions[1:2]);
+    raise exception 'reorder with a missing id should fail';
+  exception
+    when sqlstate 'Q0078' then null;
+  end;
+
+  begin
+    perform public.reorder_lines(
+      qd_job_id, v_positions || other_line_id
+    );
+    raise exception 'reorder with an extra id should fail';
+  exception
+    when sqlstate 'Q0078' then null;
+  end;
+
+  begin
+    perform public.reorder_lines(
+      qd_job_id,
+      array[other_line_id] || v_positions[2:cardinality(v_positions)]
+    );
+    raise exception 'reorder with a foreign id should fail';
+  exception
+    when sqlstate 'Q0078' then null;
+  end;
+
+  assert (
+    select array_agg(id order by position)
+    from public.line_items
+    where job_id = qd_job_id
+  ) = v_positions, 'failed reorder should change nothing';
+
+  perform public.reorder_lines(
+    qd_job_id,
+    array[v_positions[cardinality(v_positions)]]
+      || v_positions[1:cardinality(v_positions) - 1]
+  );
+  assert (
+    select id from public.line_items
+    where job_id = qd_job_id and position = 0
+  ) = v_positions[cardinality(v_positions)], 'valid reorder should stick';
+
+  -- Deleting a job deletes its lines.
+  insert into public.jobs (project_id, title, job_type)
+  values (qd_priya_project, 'To delete', 'deck')
+  returning id into v_id;
+  perform public.add_custom_line(v_id, 'Gone', null, 'fixed', 1, 100);
+  delete from public.jobs where id = v_id;
+  assert not exists (select 1 from public.jobs where id = v_id),
+    'job delete should remove the job';
+  assert not exists (select 1 from public.line_items where job_id = v_id),
+    'deleting a job should delete its lines';
+
+  -- Labor pair and labor_total_cents.
+  begin
+    update public.jobs set labor_hours = 1 where id = qd_job_no_labor;
+    raise exception 'setting only labor_hours should fail';
+  exception
+    when check_violation then null;
+  end;
+
+  begin
+    update public.jobs set labor_rate_cents = 6500 where id = qd_job_no_labor;
+    raise exception 'setting only labor_rate_cents should fail';
+  exception
+    when check_violation then null;
+  end;
+
+  update public.jobs
+  set labor_hours = 12.5, labor_rate_cents = 6500
+  where id = qd_job_no_labor;
+  assert (
+    select labor_total_cents from public.jobs where id = qd_job_no_labor
+  ) = 81250, '12.5 hrs × $65.00 should be $812.50';
+
+  -- set_project_overhead.
+  perform public.set_project_overhead(qd_priya_project, 1250);
+  assert (
+    select overhead_bps from public.projects where id = qd_priya_project
+  ) = 1250, 'set_project_overhead should store the value';
+  perform public.set_project_overhead(qd_priya_project, null);
+  assert (
+    select overhead_bps from public.projects where id = qd_priya_project
+  ) is null, 'set_project_overhead null should clear the value';
+
+  begin
+    perform public.set_project_overhead(qd_priya_project, 10001);
+    raise exception 'overhead 10001 should fail';
+  exception
+    when sqlstate 'Q0079' then null;
+  end;
+
+  -- Changing pricing_settings leaves copied labor and overhead.
+  select labor_rate_cents into v_rate
+  from public.jobs where id = qd_job_id;
+  select overhead_bps into v_overhead
+  from public.projects where id = qd_project_id;
+  update public.pricing_settings
+  set labor_rate_cents = 8000, overhead_bps = 2000;
+  assert (
+    select labor_rate_cents from public.jobs where id = qd_job_id
+  ) = v_rate, 'changing the business labor rate must not change a job';
+  assert (
+    select overhead_bps from public.projects where id = qd_project_id
+  ) = v_overhead, 'changing the business overhead must not change a project';
+
+  -- update_project.
+  perform public.update_project(
+    qd_priya_project, '  Shah updated  ', '  9 Test St  ', '  Laurel  ',
+    'md', '20707'
+  );
+  assert (
+    select title from public.projects where id = qd_priya_project
+  ) = 'Shah updated', 'update_project should trim the title';
+  assert (
+    select site_state from public.projects where id = qd_priya_project
+  ) = 'MD', 'update_project should upper-case the state';
+
   -- After Ana is removed, her projects stay and are marked (removed),
   -- with no appointment (remove_client also removes it).
   assert (
@@ -935,6 +1395,22 @@ begin
   begin
     select count(*) into v_count from public.project_rows;
     assert v_count = 0, 'anon should see 0 project_rows if select is granted';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  begin
+    select count(*) into v_count from public.jobs;
+    assert v_count = 0, 'anon should see 0 jobs if select is granted';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  begin
+    select count(*) into v_count from public.line_items;
+    assert v_count = 0, 'anon should see 0 line_items if select is granted';
   exception
     when insufficient_privilege then null;
     when sqlstate '42501' then null;

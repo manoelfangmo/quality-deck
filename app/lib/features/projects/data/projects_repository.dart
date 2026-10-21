@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app/core/database/project_rows_view.dart';
 import 'package:app/core/database/rpc.dart';
 import 'package:app/core/domain/app_exception.dart';
+import 'package:app/core/domain/percent.dart';
 import 'package:app/core/utils/providers.dart';
 import 'package:app/features/projects/data/models.dart';
 import 'package:app/features/projects/domain/project_view.dart';
@@ -101,6 +102,28 @@ class ProjectsRepository {
       await _supabase.rpc(
         Rpc.unarchiveProject,
         params: {Rpc.pProjectId: projectId},
+      );
+    } catch (error, stackTrace) {
+      AppException.throwFrom(error, stackTrace);
+    }
+  }
+
+  Future<void> update(UpdateProjectCommand command) async {
+    try {
+      await _supabase.rpc(Rpc.updateProject, params: command.toJson());
+    } catch (error, stackTrace) {
+      AppException.throwFrom(error, stackTrace);
+    }
+  }
+
+  Future<void> setOverhead(String projectId, Percent? overhead) async {
+    try {
+      await _supabase.rpc(
+        Rpc.setProjectOverhead,
+        params: {
+          Rpc.pId: projectId,
+          Rpc.pOverheadBps: overhead?.basisPoints,
+        },
       );
     } catch (error, stackTrace) {
       AppException.throwFrom(error, stackTrace);

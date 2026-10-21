@@ -27,11 +27,21 @@ class AppException implements Exception {
     'client_has_appointment':
         'This client already has an appointment. Edit or remove it first.',
     'price_item_not_found':
-        'This item was deleted. Refresh to see the latest list.',
+        'That price list item was deleted. Pick another.',
     'project_not_found':
         "This project couldn't be found. Refresh and try again.",
     'project_already_archived': 'This project is already archived.',
     'project_not_archived': "This project isn't archived.",
+    'project_archived':
+        'This project is archived. Unarchive it to make changes.',
+    'job_not_found': 'This job was deleted. Refresh to see the latest.',
+    'line_item_not_found':
+        'This line was removed. Refresh to see the latest.',
+    'invalid_quantity': 'Enter a quantity greater than 0.',
+    'field_locked':
+        "That field comes from the price list and can't be changed here.",
+    'reorder_mismatch': 'The list changed. Refresh and try again.',
+    'invalid_overhead': 'Enter a percentage from 0 to 100.',
   };
 
   const AppException.clientNotFound()
@@ -66,6 +76,18 @@ class AppException implements Exception {
   const AppException.projectNotArchived()
     : message = "This project isn't archived.",
       token = 'project_not_archived';
+
+  const AppException.projectArchived()
+    : message = 'This project is archived. Unarchive it to make changes.',
+      token = 'project_archived';
+
+  const AppException.jobNotFound()
+    : message = 'This job was deleted. Refresh to see the latest.',
+      token = 'job_not_found';
+
+  const AppException.lineItemNotFound()
+    : message = 'This line was removed. Refresh to see the latest.',
+      token = 'line_item_not_found';
 
   factory AppException.fromToken(String token) {
     return AppException(_copy[token] ?? 'Something went wrong.', token: token);

@@ -85,6 +85,15 @@ class PriceItemsRepository {
     }
   }
 
+  Future<List<PriceItem>> search(String query, {int limit = 30}) async {
+    final all = await fetchAll();
+    final needle = query.trim().toLowerCase();
+    final filtered = needle.isEmpty
+        ? all
+        : all.where((item) => item.name.toLowerCase().contains(needle));
+    return filtered.take(limit).toList();
+  }
+
   List<PriceItem> _sorted(Iterable<PriceItem> items) {
     return items.toList()..sort((a, b) {
       final byName = a.name.toLowerCase().compareTo(b.name.toLowerCase());
