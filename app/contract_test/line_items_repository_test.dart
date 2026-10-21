@@ -86,14 +86,14 @@ void main() {
 
       expect(id, isUuid);
       final line = await lineOn(job, id);
-      expect(line.name, 'Composite decking');
+      expect(line.name, 'New Composite Deck - Trex Enhance or Select');
       expect(line.isCustom, isFalse);
       expect(line.priceItemId, SeedPriceItems.compositeDeckingId);
       expect(line.pricingType, PricingType.perSqFt);
       expect(line.quantity, const Quantity(19250));
-      expect(line.savedPrice, const Money(450));
+      expect(line.savedPrice, const Money(9500));
       expect(line.overridePrice, isNull);
-      expect(line.total, const Money(86625));
+      expect(line.total, const Money(1828750));
     });
 
     test('forces quantity 1 on a fixed-price item', () async {
@@ -102,7 +102,7 @@ void main() {
       final id = await repository.addFromPriceList(
         AddPriceListLineCommand(
           jobId: job.id,
-          priceItemId: SeedPriceItems.demoExistingDeckId,
+          priceItemId: SeedPriceItems.gritMinimumId,
           quantity: const Quantity(500),
         ),
       );
@@ -110,8 +110,8 @@ void main() {
       final line = await lineOn(job, id);
       expect(line.pricingType, PricingType.fixed);
       expect(line.quantity, const Quantity(100));
-      expect(line.savedPrice, const Money(80000));
-      expect(line.total, const Money(80000));
+      expect(line.savedPrice, const Money(2500));
+      expect(line.total, const Money(2500));
     });
 
     test('keeps the copied price after the price item is edited or deleted', () async {

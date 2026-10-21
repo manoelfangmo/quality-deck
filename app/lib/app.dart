@@ -1,7 +1,8 @@
+import 'package:app/core/theme/theme.dart';
+import 'package:app/core/theme/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:app/core/constants/theme.dart';
 import 'package:app/core/routing/go_router.dart';
 import 'package:app/core/widgets/splash_page.dart';
 import 'package:app/features/auth/presentation/controllers/current_user.dart';
@@ -12,10 +13,12 @@ class App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
+    TextTheme textTheme = createTextTheme(context, "Inter", "Barlow");
+    MaterialTheme theme = MaterialTheme(textTheme);
 
     return MaterialApp.router(
       title: 'Field Notes',
-      theme: AppTheme.light(),
+      theme: theme.dark(),
       routerConfig: router,
       debugShowCheckedModeBanner: false,
       builder: (context, child) {

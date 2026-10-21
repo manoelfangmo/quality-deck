@@ -38,7 +38,10 @@ void main() {
       final items = await repository.fetchAll();
 
       expect(items, isNotEmpty);
-      expect(items.any((item) => item.name == 'Aluminum railing'), isTrue);
+      expect(
+        items.any((item) => item.name == 'New Composite Deck - Trex Transcend'),
+        isTrue,
+      );
       expect(items.any((item) => item.name == 'Hourly labor'), isFalse);
       expect(items.every((item) => item.name.isNotEmpty), isTrue);
       expect(items.every((item) => item.price.cents >= 0), isTrue);
@@ -59,7 +62,9 @@ void main() {
       final matches = await repository.search('composite', limit: 30);
 
       expect(
-        matches.any((item) => item.name == 'Composite decking'),
+        matches.any(
+          (item) => item.name == 'New Composite Deck - Trex Enhance or Select',
+        ),
         isTrue,
       );
       expect(matches.length, lessThanOrEqualTo(30));

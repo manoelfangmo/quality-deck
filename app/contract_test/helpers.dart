@@ -67,7 +67,7 @@ abstract final class SeedLineItems {
 
 abstract final class SeedPriceItems {
   static const compositeDeckingId = '00000000-0000-4000-8000-000000000305';
-  static const demoExistingDeckId = '00000000-0000-4000-8000-000000000306';
+  static const gritMinimumId = '00000000-0000-4000-8000-000000000306';
   static const otherCoHourlyLaborId = '00000000-0000-4000-8000-000000000341';
 }
 

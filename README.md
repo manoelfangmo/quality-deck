@@ -14,13 +14,20 @@ flutter run -d chrome --dart-define-from-file development.env --web-port=3000
 
 `app/development.env` holds the local API URL and anon key from `supabase status`.
 
+## Sign in
+
+Default user (Quality Deck owner):
+
+- Email: `owner@qualitydeck.test`
+- Password: `password123`
+
 ## Seeded accounts
 
 Password for every seeded user: `password123`
 
 | Email | Who |
 | --- | --- |
-| `owner@qualitydeck.test` | Quality Deck owner (Moises (dev)) |
+| `owner@qualitydeck.test` | Quality Deck owner (Moises (dev)) — default login |
 | `crew@qualitydeck.test` | Quality Deck member |
 | `other@example.test` | Other Co owner (isolation only) |
 | `nobusiness@example.test` | Signed up, no membership (lands on onboarding) |

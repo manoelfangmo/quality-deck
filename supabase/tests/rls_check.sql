@@ -157,7 +157,7 @@ begin
   assert v_labor = 6500, 'owner should see Quality Deck labor rate';
   assert v_overhead = 1250, 'owner should see Quality Deck overhead';
   select count(*) into v_count from public.price_items;
-  assert v_count = 25, 'owner should see 25 Quality Deck price items';
+  assert v_count = 33, 'owner should see 33 Quality Deck price items';
   assert not exists (select 1 from public.price_items where id = other_item_id),
     'owner must not see Other Co price items';
 
@@ -1053,10 +1053,10 @@ begin
   into v_name, v_desc, v_type, v_price, v_qty, v_item_id
   from public.line_items
   where id = v_id;
-  assert v_name = 'Composite decking', 'copied name';
+  assert v_name = 'New Composite Deck - Trex Enhance or Select', 'copied name';
   assert v_desc is not null, 'copied description';
   assert v_type = 'per_sq_ft', 'copied pricing type';
-  assert v_price = 450, 'copied price';
+  assert v_price = 9500, 'copied price';
   assert v_qty = 10, 'quantity stored';
   assert v_item_id = qd_composite_item, 'price_item_id set';
 
@@ -1067,17 +1067,17 @@ begin
   into v_name, v_desc, v_price
   from public.line_items
   where id = v_id;
-  assert v_name = 'Composite decking', 'editing a price item must not change the line name';
+  assert v_name = 'New Composite Deck - Trex Enhance or Select', 'editing a price item must not change the line name';
   assert v_desc is distinct from 'Changed', 'editing a price item must not change the line description';
-  assert v_price = 450, 'editing a price item must not change the saved price';
+  assert v_price = 9500, 'editing a price item must not change the saved price';
 
   delete from public.price_items where id = qd_composite_item;
   select name, saved_price_cents, price_item_id
   into v_name, v_price, v_item_id
   from public.line_items
   where id = v_id;
-  assert v_name = 'Composite decking', 'deleting a price item must not change the line name';
-  assert v_price = 450, 'deleting a price item must not change the saved price';
+  assert v_name = 'New Composite Deck - Trex Enhance or Select', 'deleting a price item must not change the line name';
+  assert v_price = 9500, 'deleting a price item must not change the saved price';
   assert v_item_id is null, 'deleting a price item should set price_item_id to null';
 
   -- Seeded line whose item was deleted already has a null price_item_id.
@@ -1088,12 +1088,16 @@ begin
     select name from public.line_items where id = qd_deleted_item_line
   ) = 'Old fascia', 'seeded deleted-item line should keep its copied name';
 
-  -- Restore the composite item so later assertions about the 25-item list
+  -- Restore the composite item so later assertions about the catalog
   -- are not needed; this script rolls back anyway.
   insert into public.price_items (
     id, name, description, pricing_type, price_cents
   ) values (
-    qd_composite_item, 'Composite decking', 'restored', 'per_sq_ft', 450
+    qd_composite_item,
+    'New Composite Deck - Trex Enhance or Select',
+    'restored',
+    'per_sq_ft',
+    9500
   );
 
   -- Fixed lines always have quantity 1.

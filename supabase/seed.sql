@@ -939,12 +939,12 @@ values
 
 -- ---------------------------------------------------------------------------
 -- Pricing
--- Quality Deck: labor $65.00/hr, overhead 12.5%, 25 items (all five types;
--- about half with a description, including one long multi-line).
+-- Quality Deck: labor $65.00/hr, overhead 12.5%, 33 items from the
+-- 3/10/2020 price sheet (all five pricing types).
 -- Other Co: settings not set, three items.
 --
 -- ids
---   QD items   00000000-0000-4000-8000-000000000301 .. 325
+--   QD items   00000000-0000-4000-8000-000000000301 .. 333
 --   Other Co   00000000-0000-4000-8000-000000000341, 342, 343
 -- ---------------------------------------------------------------------------
 
@@ -969,258 +969,309 @@ values
 
 insert into public.price_items (
   id, business_id, name, description, pricing_type, price_cents,
-  created_by, updated_at
+  created_by
 )
 values
+  -- New deck options (retail per sq ft)
   (
     '00000000-0000-4000-8000-000000000301',
     '00000000-0000-4000-8000-000000000011',
-    'Aluminum railing',
-    'Powder-coated, includes brackets',
-    'per_linear_ft',
-    3800,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '1 day'
+    'New Composite Deck - Trex Transcend',
+    'Based on an installed per-square-foot price of the decking and rail. Itemized — refer to the calculator for exact prices and options.',
+    'per_sq_ft',
+    11000,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000302',
     '00000000-0000-4000-8000-000000000011',
-    'Baluster',
-    null,
-    'per_unit',
-    800,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '2 days'
+    'New Composite Deck - TimberTech Edge',
+    'Based on an installed per-square-foot price of the decking and rail. Itemized — refer to the calculator for exact prices and options.',
+    'per_sq_ft',
+    10000,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000303',
     '00000000-0000-4000-8000-000000000011',
-    'Box step',
-    'Built-in storage under the tread',
-    'per_step',
-    12000,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '3 days'
+    'New KDAT Green Certified Wood Deck',
+    'Based on an installed per-square-foot price of the decking and rail. Itemized — refer to the calculator for exact prices and options.',
+    'per_sq_ft',
+    7500,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000304',
     '00000000-0000-4000-8000-000000000011',
-    'Cable railing',
-    null,
-    'per_linear_ft',
-    5500,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '4 days'
+    'New Pressure Treated Wood Deck',
+    'Based on an installed per-square-foot price of the decking and rail. Itemized — refer to the calculator for exact prices and options.',
+    'per_sq_ft',
+    6000,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000305',
     '00000000-0000-4000-8000-000000000011',
-    'Composite decking',
-    E'Trex Enhance boards in the color selected on site,\nhidden fasteners, color-matched plugs, and waste factor.\n\nDoes not include railings, stairs, or permit fees.\nThose are listed separately.',
+    'New Composite Deck - Trex Enhance or Select',
+    E'Based on an installed per-square-foot price of the decking and rail.\nItemized — refer to the calculator for exact prices and options.',
     'per_sq_ft',
-    450,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '5 days'
+    9500,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000306',
     '00000000-0000-4000-8000-000000000011',
-    'Demo existing deck',
-    'Haul-away included',
+    'Add Grit to Sealant - minimum',
+    'Job minimum when grit for a No Slip sealant is under $25. Pair with the per-sq-ft grit item.',
     'fixed',
-    80000,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '6 days'
+    2500,
+    '00000000-0000-4000-8000-000000000001'
   ),
+  -- Board replacement options (retail per sq ft)
   (
     '00000000-0000-4000-8000-000000000307',
     '00000000-0000-4000-8000-000000000011',
-    'Design consult',
-    null,
-    'fixed',
-    15000,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '7 days'
+    'Gold Package - Trex Transcend',
+    'New composite boards on deck flat surfaces, stair treads, and top rail or milling, plus one coat of patented Deck Solution protective coating on balusters, rail posts, fascia, stringers, and risers if applicable. No rails: $40/SF.',
+    'per_sq_ft',
+    2000,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000308',
     '00000000-0000-4000-8000-000000000011',
-    'Dumpster rental',
-    '10-yard, one week',
-    'fixed',
-    45000,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '8 days'
+    'Gold Package - Azek/TimberTech Edge',
+    'New composite boards on deck flat surfaces, stair treads, and top rail or milling, plus one coat of patented Deck Solution protective coating on balusters, rail posts, fascia, stringers, and risers if applicable. No rails: $36/SF.',
+    'per_sq_ft',
+    1800,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000309',
     '00000000-0000-4000-8000-000000000011',
-    'Fascia board',
-    null,
-    'per_linear_ft',
-    600,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '9 days'
+    'Gold Package - Trex Enhance or Select',
+    'New composite boards on deck flat surfaces, stair treads, and top rail or milling, plus one coat of patented Deck Solution protective coating on balusters, rail posts, fascia, stringers, and risers if applicable. No rails: $34/SF.',
+    'per_sq_ft',
+    1700,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000310',
     '00000000-0000-4000-8000-000000000011',
-    'Landing step',
-    null,
-    'per_step',
-    8500,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '10 days'
+    'Silver Package - KDAT Green Certified',
+    'New KDAT pine boards on deck flat surfaces, stair treads, and top rail or milling, plus one coat of patented Deck Solution protective coating on balusters, rail posts, fascia, stringers, and risers if applicable. No rails: $32/SF.',
+    'per_sq_ft',
+    1600,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000311',
     '00000000-0000-4000-8000-000000000011',
-    'Lighting fixture',
-    'Low-voltage post cap or riser light',
-    'per_unit',
-    4500,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '11 days'
+    'Bronze Package - Standard Lumber',
+    'New pressure-treated pine boards on deck flat surfaces, stair treads, and top rail or milling, plus one coat of patented Deck Solution protective coating on balusters, rail posts, fascia, stringers, and risers if applicable. No rails: $30/SF.',
+    'per_sq_ft',
+    1500,
+    '00000000-0000-4000-8000-000000000001'
   ),
+  -- Revitalizing deck options
   (
     '00000000-0000-4000-8000-000000000312',
     '00000000-0000-4000-8000-000000000011',
-    'Patio pavers',
-    null,
+    'Deck Solution Package',
+    'On the flat surfaces (decking and top rail): sand flat surfaces, apply one coat of primer, and apply two coats of patented Deck Solution protective coating.',
     'per_sq_ft',
-    800,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '12 days'
+    1600,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000313',
     '00000000-0000-4000-8000-000000000011',
-    'Permit filing',
-    'County application and pickup',
-    'fixed',
-    35000,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '13 days'
+    'Premium Wash & Stain',
+    'Wash to remove grease, sap, and residue, then apply one coat of stain and a protective layer.',
+    'per_sq_ft',
+    1100,
+    '00000000-0000-4000-8000-000000000001'
   ),
+  -- Options and miscellaneous
   (
     '00000000-0000-4000-8000-000000000314',
     '00000000-0000-4000-8000-000000000011',
-    'Picture frame border',
-    null,
+    'New Pressure Treated Railings',
+    'Includes protective coating. Sold in 6 or 8 foot sections.',
     'per_linear_ft',
-    1200,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '14 days'
+    6000,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000315',
     '00000000-0000-4000-8000-000000000011',
-    'Post cap',
-    'Copper or composite',
-    'per_unit',
-    1500,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '15 days'
+    'Add Grit to Sealant (No Slip)',
+    '$0.50/SF. Add the minimum charge item when the area total is under $25.',
+    'per_sq_ft',
+    50,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000316',
     '00000000-0000-4000-8000-000000000011',
-    'Post footing',
-    null,
-    'per_unit',
-    8500,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '16 days'
+    'Deck Solution on 6x6 Posts',
+    '$2 per foot of post height.',
+    'per_linear_ft',
+    200,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000317',
     '00000000-0000-4000-8000-000000000011',
-    'Pressure-treated decking',
-    'Ground-contact rated, includes fasteners',
-    'per_sq_ft',
-    325,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '17 days'
+    'Deck Solution on 4x4 Posts',
+    '$1 per foot of post height.',
+    'per_linear_ft',
+    100,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000318',
     '00000000-0000-4000-8000-000000000011',
-    'Site cleanup',
-    null,
-    'fixed',
-    20000,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '18 days'
+    'Pressure Treated Pine Boards (under 20 ft)',
+    'Replacement boards.',
+    'per_linear_ft',
+    1000,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000319',
     '00000000-0000-4000-8000-000000000011',
-    'Stair lighting',
-    'Riser-mounted LED',
-    'per_step',
-    4000,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '19 days'
+    'Pressure Treated Pine Boards (over 20 ft)',
+    'Replacement boards.',
+    'per_linear_ft',
+    1200,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000320',
     '00000000-0000-4000-8000-000000000011',
-    'Stair stringer',
-    null,
+    'KDAT Pine Boards (under 20 ft)',
+    'Replacement boards.',
     'per_linear_ft',
-    2500,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '20 days'
+    1200,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000321',
     '00000000-0000-4000-8000-000000000011',
-    'Stair tread (composite)',
-    'Includes riser and hidden fasteners',
-    'per_step',
-    9500,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '21 days'
+    'KDAT Pine Boards (over 20 ft)',
+    'Replacement boards.',
+    'per_linear_ft',
+    1500,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000322',
     '00000000-0000-4000-8000-000000000011',
-    'Staining',
+    '4x4 Pressure Treated Posts',
     null,
-    'per_sq_ft',
-    175,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '22 days'
+    'per_unit',
+    5000,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000323',
     '00000000-0000-4000-8000-000000000011',
-    'Waterproof membrane',
-    'Under-deck drainage, taped seams',
-    'per_sq_ft',
-    200,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '23 days'
+    '6x6 Pressure Treated Posts',
+    null,
+    'per_unit',
+    10000,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000324',
     '00000000-0000-4000-8000-000000000011',
-    'Wrap-around step',
+    'Pressure Treated Balusters',
     null,
-    'per_step',
-    15000,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '24 days'
+    'per_unit',
+    400,
+    '00000000-0000-4000-8000-000000000001'
   ),
   (
     '00000000-0000-4000-8000-000000000325',
     '00000000-0000-4000-8000-000000000011',
-    'Ledger flashing',
-    'Includes fasteners and hidden clips',
+    '2x12 Pressure Treated Joists',
+    null,
+    'per_linear_ft',
+    1000,
+    '00000000-0000-4000-8000-000000000001'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000326',
+    '00000000-0000-4000-8000-000000000011',
+    'Stringers (up to 6 steps)',
+    null,
     'per_unit',
-    2500,
-    '00000000-0000-4000-8000-000000000001',
-    now() - interval '25 days'
+    7500,
+    '00000000-0000-4000-8000-000000000001'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000327',
+    '00000000-0000-4000-8000-000000000011',
+    'Custom Stringer (6+ steps)',
+    'Custom-made stringer for more than 6 steps.',
+    'per_unit',
+    50000,
+    '00000000-0000-4000-8000-000000000001'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000328',
+    '00000000-0000-4000-8000-000000000011',
+    'Replacement 6x6 Post with New Footer',
+    'New pressure-treated 6x6 post with a new concrete footer.',
+    'per_unit',
+    70000,
+    '00000000-0000-4000-8000-000000000001'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000329',
+    '00000000-0000-4000-8000-000000000011',
+    'Replacement 6x6 Post with Existing Footer',
+    'Uses the existing concrete footer. Up to 16 feet high.',
+    'per_unit',
+    45000,
+    '00000000-0000-4000-8000-000000000001'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000330',
+    '00000000-0000-4000-8000-000000000011',
+    'Vinyl Privacy Lattice',
+    '4x8 diamond sheets in White, Cedar, and Redwood.',
+    'per_sq_ft',
+    500,
+    '00000000-0000-4000-8000-000000000001'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000331',
+    '00000000-0000-4000-8000-000000000011',
+    'Wood Lattice',
+    'We coat it.',
+    'per_sq_ft',
+    500,
+    '00000000-0000-4000-8000-000000000001'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000332',
+    '00000000-0000-4000-8000-000000000011',
+    'Coating Only (No Sanding)',
+    'Additional areas. Coating only, no sanding.',
+    'per_sq_ft',
+    500,
+    '00000000-0000-4000-8000-000000000001'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000333',
+    '00000000-0000-4000-8000-000000000011',
+    'Build New Wood Steps',
+    null,
+    'per_step',
+    9000,
+    '00000000-0000-4000-8000-000000000001'
   ),
   -- Other Co
   (
@@ -1230,8 +1281,7 @@ values
     null,
     'fixed',
     7500,
-    '00000000-0000-4000-8000-000000000003',
-    now() - interval '1 day'
+    '00000000-0000-4000-8000-000000000003'
   ),
   (
     '00000000-0000-4000-8000-000000000342',
@@ -1240,8 +1290,7 @@ values
     '6-foot cedar',
     'per_unit',
     8500,
-    '00000000-0000-4000-8000-000000000003',
-    now() - interval '2 days'
+    '00000000-0000-4000-8000-000000000003'
   ),
   (
     '00000000-0000-4000-8000-000000000343',
@@ -1250,8 +1299,7 @@ values
     null,
     'per_sq_ft',
     85,
-    '00000000-0000-4000-8000-000000000003',
-    now() - interval '3 days'
+    '00000000-0000-4000-8000-000000000003'
   );
 
 -- ---------------------------------------------------------------------------

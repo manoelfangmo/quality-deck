@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:app/core/constants/theme.dart';
 import 'package:app/core/widgets/button.dart';
 import 'package:app/core/widgets/extensions.dart';
 import 'package:collection/collection.dart';
