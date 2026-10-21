@@ -4,33 +4,36 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 
-import 'dart:async' as _i10;
+import 'dart:async' as _i11;
 
-import 'package:app/core/domain/app_user.dart' as _i12;
+import 'package:app/core/domain/app_user.dart' as _i13;
 import 'package:app/core/utils/local_store.dart' as _i2;
-import 'package:app/features/auth/data/auth_repository.dart' as _i9;
-import 'package:app/features/business/data/business_repository.dart' as _i13;
-import 'package:app/features/business/data/invites_repository.dart' as _i18;
-import 'package:app/features/business/data/models.dart' as _i16;
-import 'package:app/features/business/domain/business.dart' as _i14;
+import 'package:app/features/auth/data/auth_repository.dart' as _i10;
+import 'package:app/features/business/data/business_repository.dart' as _i14;
+import 'package:app/features/business/data/invites_repository.dart' as _i19;
+import 'package:app/features/business/data/models.dart' as _i17;
+import 'package:app/features/business/domain/business.dart' as _i15;
 import 'package:app/features/business/domain/invite.dart' as _i4;
-import 'package:app/features/business/domain/member.dart' as _i15;
-import 'package:app/features/clients/data/clients_repository.dart' as _i19;
+import 'package:app/features/business/domain/member.dart' as _i16;
+import 'package:app/features/clients/data/clients_repository.dart' as _i20;
 import 'package:app/features/clients/data/models.dart' as _i5;
 import 'package:app/features/clients/domain/client.dart' as _i6;
 import 'package:app/features/pricing/data/models.dart' as _i7;
-import 'package:app/features/pricing/data/price_items_repository.dart' as _i25;
-import 'package:app/features/pricing/data/pricing_repository.dart' as _i23;
+import 'package:app/features/pricing/data/price_items_repository.dart' as _i26;
+import 'package:app/features/pricing/data/pricing_repository.dart' as _i24;
 import 'package:app/features/pricing/domain/price_item.dart' as _i8;
-import 'package:app/features/pricing/domain/pricing_settings.dart' as _i24;
+import 'package:app/features/pricing/domain/pricing_settings.dart' as _i25;
+import 'package:app/features/projects/data/models.dart' as _i9;
+import 'package:app/features/projects/data/projects_repository.dart' as _i27;
+import 'package:app/features/projects/domain/project_view.dart' as _i28;
 import 'package:app/features/scheduling/data/appointments_repository.dart'
-    as _i20;
-import 'package:app/features/scheduling/data/models.dart' as _i22;
-import 'package:app/features/scheduling/domain/appointment.dart' as _i21;
+    as _i21;
+import 'package:app/features/scheduling/data/models.dart' as _i23;
+import 'package:app/features/scheduling/domain/appointment.dart' as _i22;
 import 'package:clock/clock.dart' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i17;
-import 'package:supabase_flutter/supabase_flutter.dart' as _i11;
+import 'package:mockito/src/dummies.dart' as _i18;
+import 'package:supabase_flutter/supabase_flutter.dart' as _i12;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -83,10 +86,15 @@ class _FakePriceItem_6 extends _i1.SmartFake implements _i8.PriceItem {
     : super(parent, parentInvocation);
 }
 
+class _FakeProjectPage_7 extends _i1.SmartFake implements _i9.ProjectPage {
+  _FakeProjectPage_7(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [AuthRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAuthRepository extends _i1.Mock implements _i9.AuthRepository {
+class MockAuthRepository extends _i1.Mock implements _i10.AuthRepository {
   @override
   _i2.LocalSettings get localSettings => (super.noSuchMethod(
     Invocation.getter(#localSettings),
@@ -105,24 +113,24 @@ class MockAuthRepository extends _i1.Mock implements _i9.AuthRepository {
   ) as _i3.Clock);
 
   @override
-  _i10.Stream<_i11.AuthState> authStateChanges() => (super.noSuchMethod(
+  _i11.Stream<_i12.AuthState> authStateChanges() => (super.noSuchMethod(
     Invocation.method(#authStateChanges, []),
-    returnValue: _i10.Stream<_i11.AuthState>.empty(),
-    returnValueForMissingStub: _i10.Stream<_i11.AuthState>.empty(),
-  ) as _i10.Stream<_i11.AuthState>);
+    returnValue: _i11.Stream<_i12.AuthState>.empty(),
+    returnValueForMissingStub: _i11.Stream<_i12.AuthState>.empty(),
+  ) as _i11.Stream<_i12.AuthState>);
 
   @override
-  _i10.Future<void> signIn({
+  _i11.Future<void> signIn({
     required String? email,
     required String? password,
   }) => (super.noSuchMethod(
     Invocation.method(#signIn, [], {#email: email, #password: password}),
-    returnValue: _i10.Future<void>.value(),
-    returnValueForMissingStub: _i10.Future<void>.value(),
-  ) as _i10.Future<void>);
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
 
   @override
-  _i10.Future<bool> signUp({
+  _i11.Future<bool> signUp({
     required String? fullName,
     required String? email,
     required String? password,
@@ -132,23 +140,23 @@ class MockAuthRepository extends _i1.Mock implements _i9.AuthRepository {
       #email: email,
       #password: password,
     }),
-    returnValue: _i10.Future<bool>.value(false),
-    returnValueForMissingStub: _i10.Future<bool>.value(false),
-  ) as _i10.Future<bool>);
+    returnValue: _i11.Future<bool>.value(false),
+    returnValueForMissingStub: _i11.Future<bool>.value(false),
+  ) as _i11.Future<bool>);
 
   @override
-  _i10.Future<void> signOut() => (super.noSuchMethod(
+  _i11.Future<void> signOut() => (super.noSuchMethod(
     Invocation.method(#signOut, []),
-    returnValue: _i10.Future<void>.value(),
-    returnValueForMissingStub: _i10.Future<void>.value(),
-  ) as _i10.Future<void>);
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
 
   @override
-  _i10.Future<_i12.AppUser?> fetchCurrentUser() => (super.noSuchMethod(
+  _i11.Future<_i13.AppUser?> fetchCurrentUser() => (super.noSuchMethod(
     Invocation.method(#fetchCurrentUser, []),
-    returnValue: _i10.Future<_i12.AppUser?>.value(),
-    returnValueForMissingStub: _i10.Future<_i12.AppUser?>.value(),
-  ) as _i10.Future<_i12.AppUser?>);
+    returnValue: _i11.Future<_i13.AppUser?>.value(),
+    returnValueForMissingStub: _i11.Future<_i13.AppUser?>.value(),
+  ) as _i11.Future<_i13.AppUser?>);
 
   @override
   void rememberSignInIfMissing() => super.noSuchMethod(
@@ -161,68 +169,68 @@ class MockAuthRepository extends _i1.Mock implements _i9.AuthRepository {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockBusinessRepository extends _i1.Mock
-    implements _i13.BusinessRepository {
+    implements _i14.BusinessRepository {
   @override
-  _i10.Future<_i14.Business?> fetchBusiness() => (super.noSuchMethod(
+  _i11.Future<_i15.Business?> fetchBusiness() => (super.noSuchMethod(
     Invocation.method(#fetchBusiness, []),
-    returnValue: _i10.Future<_i14.Business?>.value(),
-    returnValueForMissingStub: _i10.Future<_i14.Business?>.value(),
-  ) as _i10.Future<_i14.Business?>);
+    returnValue: _i11.Future<_i15.Business?>.value(),
+    returnValueForMissingStub: _i11.Future<_i15.Business?>.value(),
+  ) as _i11.Future<_i15.Business?>);
 
   @override
-  _i10.Future<List<_i15.Member>> fetchMembers() => (super.noSuchMethod(
+  _i11.Future<List<_i16.Member>> fetchMembers() => (super.noSuchMethod(
     Invocation.method(#fetchMembers, []),
-    returnValue: _i10.Future<List<_i15.Member>>.value(<_i15.Member>[]),
-    returnValueForMissingStub: _i10.Future<List<_i15.Member>>.value(
-      <_i15.Member>[],
+    returnValue: _i11.Future<List<_i16.Member>>.value(<_i16.Member>[]),
+    returnValueForMissingStub: _i11.Future<List<_i16.Member>>.value(
+      <_i16.Member>[],
     ),
-  ) as _i10.Future<List<_i15.Member>>);
+  ) as _i11.Future<List<_i16.Member>>);
 
   @override
-  _i10.Future<String> createBusiness(_i16.CreateBusinessCommand? command) =>
+  _i11.Future<String> createBusiness(_i17.CreateBusinessCommand? command) =>
       (super.noSuchMethod(
         Invocation.method(#createBusiness, [command]),
-        returnValue: _i10.Future<String>.value(
-          _i17.dummyValue<String>(
+        returnValue: _i11.Future<String>.value(
+          _i18.dummyValue<String>(
             this,
             Invocation.method(#createBusiness, [command]),
           ),
         ),
-        returnValueForMissingStub: _i10.Future<String>.value(
-          _i17.dummyValue<String>(
+        returnValueForMissingStub: _i11.Future<String>.value(
+          _i18.dummyValue<String>(
             this,
             Invocation.method(#createBusiness, [command]),
           ),
         ),
-      ) as _i10.Future<String>);
+      ) as _i11.Future<String>);
 
   @override
-  _i10.Future<String> redeemInvite(_i16.RedeemInviteCommand? command) =>
+  _i11.Future<String> redeemInvite(_i17.RedeemInviteCommand? command) =>
       (super.noSuchMethod(
         Invocation.method(#redeemInvite, [command]),
-        returnValue: _i10.Future<String>.value(
-          _i17.dummyValue<String>(
+        returnValue: _i11.Future<String>.value(
+          _i18.dummyValue<String>(
             this,
             Invocation.method(#redeemInvite, [command]),
           ),
         ),
-        returnValueForMissingStub: _i10.Future<String>.value(
-          _i17.dummyValue<String>(
+        returnValueForMissingStub: _i11.Future<String>.value(
+          _i18.dummyValue<String>(
             this,
             Invocation.method(#redeemInvite, [command]),
           ),
         ),
-      ) as _i10.Future<String>);
+      ) as _i11.Future<String>);
 
   @override
-  _i10.Future<void> removeMember(String? userId) => (super.noSuchMethod(
+  _i11.Future<void> removeMember(String? userId) => (super.noSuchMethod(
     Invocation.method(#removeMember, [userId]),
-    returnValue: _i10.Future<void>.value(),
-    returnValueForMissingStub: _i10.Future<void>.value(),
-  ) as _i10.Future<void>);
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
 
   @override
-  _i10.Future<void> renameBusiness({
+  _i11.Future<void> renameBusiness({
     required String? businessId,
     required String? name,
   }) => (super.noSuchMethod(
@@ -230,237 +238,331 @@ class MockBusinessRepository extends _i1.Mock
       #businessId: businessId,
       #name: name,
     }),
-    returnValue: _i10.Future<void>.value(),
-    returnValueForMissingStub: _i10.Future<void>.value(),
-  ) as _i10.Future<void>);
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
 }
 
 /// A class which mocks [InvitesRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockInvitesRepository extends _i1.Mock implements _i18.InvitesRepository {
+class MockInvitesRepository extends _i1.Mock implements _i19.InvitesRepository {
   @override
-  _i10.Future<List<_i4.Invite>> fetchInvites() => (super.noSuchMethod(
+  _i11.Future<List<_i4.Invite>> fetchInvites() => (super.noSuchMethod(
     Invocation.method(#fetchInvites, []),
-    returnValue: _i10.Future<List<_i4.Invite>>.value(<_i4.Invite>[]),
-    returnValueForMissingStub: _i10.Future<List<_i4.Invite>>.value(
+    returnValue: _i11.Future<List<_i4.Invite>>.value(<_i4.Invite>[]),
+    returnValueForMissingStub: _i11.Future<List<_i4.Invite>>.value(
       <_i4.Invite>[],
     ),
-  ) as _i10.Future<List<_i4.Invite>>);
+  ) as _i11.Future<List<_i4.Invite>>);
 
   @override
-  _i10.Future<_i4.Invite> createInvite() => (super.noSuchMethod(
+  _i11.Future<_i4.Invite> createInvite() => (super.noSuchMethod(
     Invocation.method(#createInvite, []),
-    returnValue: _i10.Future<_i4.Invite>.value(
+    returnValue: _i11.Future<_i4.Invite>.value(
       _FakeInvite_2(this, Invocation.method(#createInvite, [])),
     ),
-    returnValueForMissingStub: _i10.Future<_i4.Invite>.value(
+    returnValueForMissingStub: _i11.Future<_i4.Invite>.value(
       _FakeInvite_2(this, Invocation.method(#createInvite, [])),
     ),
-  ) as _i10.Future<_i4.Invite>);
+  ) as _i11.Future<_i4.Invite>);
 
   @override
-  _i10.Future<void> revokeInvite(String? inviteId) => (super.noSuchMethod(
+  _i11.Future<void> revokeInvite(String? inviteId) => (super.noSuchMethod(
     Invocation.method(#revokeInvite, [inviteId]),
-    returnValue: _i10.Future<void>.value(),
-    returnValueForMissingStub: _i10.Future<void>.value(),
-  ) as _i10.Future<void>);
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
 }
 
 /// A class which mocks [ClientsRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockClientsRepository extends _i1.Mock implements _i19.ClientsRepository {
+class MockClientsRepository extends _i1.Mock implements _i20.ClientsRepository {
   @override
-  _i10.Future<_i5.ClientPage> fetchPage({
+  _i11.Future<_i5.ClientPage> fetchPage({
     required int? page,
     required int? pageSize,
   }) => (super.noSuchMethod(
     Invocation.method(#fetchPage, [], {#page: page, #pageSize: pageSize}),
-    returnValue: _i10.Future<_i5.ClientPage>.value(
+    returnValue: _i11.Future<_i5.ClientPage>.value(
       _FakeClientPage_3(
         this,
         Invocation.method(#fetchPage, [], {#page: page, #pageSize: pageSize}),
       ),
     ),
-    returnValueForMissingStub: _i10.Future<_i5.ClientPage>.value(
+    returnValueForMissingStub: _i11.Future<_i5.ClientPage>.value(
       _FakeClientPage_3(
         this,
         Invocation.method(#fetchPage, [], {#page: page, #pageSize: pageSize}),
       ),
     ),
-  ) as _i10.Future<_i5.ClientPage>);
+  ) as _i11.Future<_i5.ClientPage>);
 
   @override
-  _i10.Future<List<_i6.Client>> fetchAll() => (super.noSuchMethod(
+  _i11.Future<List<_i6.Client>> fetchAll() => (super.noSuchMethod(
     Invocation.method(#fetchAll, []),
-    returnValue: _i10.Future<List<_i6.Client>>.value(<_i6.Client>[]),
-    returnValueForMissingStub: _i10.Future<List<_i6.Client>>.value(
+    returnValue: _i11.Future<List<_i6.Client>>.value(<_i6.Client>[]),
+    returnValueForMissingStub: _i11.Future<List<_i6.Client>>.value(
       <_i6.Client>[],
     ),
-  ) as _i10.Future<List<_i6.Client>>);
+  ) as _i11.Future<List<_i6.Client>>);
 
   @override
-  _i10.Future<_i6.Client> create(_i5.CreateClientCommand? command) =>
+  _i11.Future<List<_i6.Client>> search(String? query, {int? limit = 20}) =>
+      (super.noSuchMethod(
+        Invocation.method(#search, [query], {#limit: limit}),
+        returnValue: _i11.Future<List<_i6.Client>>.value(<_i6.Client>[]),
+        returnValueForMissingStub: _i11.Future<List<_i6.Client>>.value(
+          <_i6.Client>[],
+        ),
+      ) as _i11.Future<List<_i6.Client>>);
+
+  @override
+  _i11.Future<_i6.Client> create(_i5.CreateClientCommand? command) =>
       (super.noSuchMethod(
         Invocation.method(#create, [command]),
-        returnValue: _i10.Future<_i6.Client>.value(
+        returnValue: _i11.Future<_i6.Client>.value(
           _FakeClient_4(this, Invocation.method(#create, [command])),
         ),
-        returnValueForMissingStub: _i10.Future<_i6.Client>.value(
+        returnValueForMissingStub: _i11.Future<_i6.Client>.value(
           _FakeClient_4(this, Invocation.method(#create, [command])),
         ),
-      ) as _i10.Future<_i6.Client>);
+      ) as _i11.Future<_i6.Client>);
 
   @override
-  _i10.Future<_i6.Client> update(_i5.UpdateClientCommand? command) =>
+  _i11.Future<_i6.Client> update(_i5.UpdateClientCommand? command) =>
       (super.noSuchMethod(
         Invocation.method(#update, [command]),
-        returnValue: _i10.Future<_i6.Client>.value(
+        returnValue: _i11.Future<_i6.Client>.value(
           _FakeClient_4(this, Invocation.method(#update, [command])),
         ),
-        returnValueForMissingStub: _i10.Future<_i6.Client>.value(
+        returnValueForMissingStub: _i11.Future<_i6.Client>.value(
           _FakeClient_4(this, Invocation.method(#update, [command])),
         ),
-      ) as _i10.Future<_i6.Client>);
+      ) as _i11.Future<_i6.Client>);
 
   @override
-  _i10.Future<void> remove(String? clientId) => (super.noSuchMethod(
+  _i11.Future<void> remove(String? clientId) => (super.noSuchMethod(
     Invocation.method(#remove, [clientId]),
-    returnValue: _i10.Future<void>.value(),
-    returnValueForMissingStub: _i10.Future<void>.value(),
-  ) as _i10.Future<void>);
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
 }
 
 /// A class which mocks [AppointmentsRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockAppointmentsRepository extends _i1.Mock
-    implements _i20.AppointmentsRepository {
+    implements _i21.AppointmentsRepository {
   @override
-  _i10.Future<_i21.Appointment?> fetchForClient(String? clientId) =>
+  _i11.Future<_i22.Appointment?> fetchForClient(String? clientId) =>
       (super.noSuchMethod(
         Invocation.method(#fetchForClient, [clientId]),
-        returnValue: _i10.Future<_i21.Appointment?>.value(),
-        returnValueForMissingStub: _i10.Future<_i21.Appointment?>.value(),
-      ) as _i10.Future<_i21.Appointment?>);
+        returnValue: _i11.Future<_i22.Appointment?>.value(),
+        returnValueForMissingStub: _i11.Future<_i22.Appointment?>.value(),
+      ) as _i11.Future<_i22.Appointment?>);
 
   @override
-  _i10.Future<String> add(_i22.AddAppointmentCommand? command) =>
+  _i11.Future<String> add(_i23.AddAppointmentCommand? command) =>
       (super.noSuchMethod(
         Invocation.method(#add, [command]),
-        returnValue: _i10.Future<String>.value(
-          _i17.dummyValue<String>(this, Invocation.method(#add, [command])),
+        returnValue: _i11.Future<String>.value(
+          _i18.dummyValue<String>(this, Invocation.method(#add, [command])),
         ),
-        returnValueForMissingStub: _i10.Future<String>.value(
-          _i17.dummyValue<String>(this, Invocation.method(#add, [command])),
+        returnValueForMissingStub: _i11.Future<String>.value(
+          _i18.dummyValue<String>(this, Invocation.method(#add, [command])),
         ),
-      ) as _i10.Future<String>);
+      ) as _i11.Future<String>);
 
   @override
-  _i10.Future<void> update(_i22.UpdateAppointmentCommand? command) =>
+  _i11.Future<void> update(_i23.UpdateAppointmentCommand? command) =>
       (super.noSuchMethod(
         Invocation.method(#update, [command]),
-        returnValue: _i10.Future<void>.value(),
-        returnValueForMissingStub: _i10.Future<void>.value(),
-      ) as _i10.Future<void>);
+        returnValue: _i11.Future<void>.value(),
+        returnValueForMissingStub: _i11.Future<void>.value(),
+      ) as _i11.Future<void>);
 
   @override
-  _i10.Future<void> remove(String? appointmentId) => (super.noSuchMethod(
+  _i11.Future<void> remove(String? appointmentId) => (super.noSuchMethod(
     Invocation.method(#remove, [appointmentId]),
-    returnValue: _i10.Future<void>.value(),
-    returnValueForMissingStub: _i10.Future<void>.value(),
-  ) as _i10.Future<void>);
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
 }
 
 /// A class which mocks [PricingRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockPricingRepository extends _i1.Mock implements _i23.PricingRepository {
+class MockPricingRepository extends _i1.Mock implements _i24.PricingRepository {
   @override
-  _i10.Future<_i24.PricingSettings?> fetchSettings() => (super.noSuchMethod(
+  _i11.Future<_i25.PricingSettings?> fetchSettings() => (super.noSuchMethod(
     Invocation.method(#fetchSettings, []),
-    returnValue: _i10.Future<_i24.PricingSettings?>.value(),
-    returnValueForMissingStub: _i10.Future<_i24.PricingSettings?>.value(),
-  ) as _i10.Future<_i24.PricingSettings?>);
+    returnValue: _i11.Future<_i25.PricingSettings?>.value(),
+    returnValueForMissingStub: _i11.Future<_i25.PricingSettings?>.value(),
+  ) as _i11.Future<_i25.PricingSettings?>);
 
   @override
-  _i10.Future<void> updateLaborRate(int? cents) => (super.noSuchMethod(
+  _i11.Future<void> updateLaborRate(int? cents) => (super.noSuchMethod(
     Invocation.method(#updateLaborRate, [cents]),
-    returnValue: _i10.Future<void>.value(),
-    returnValueForMissingStub: _i10.Future<void>.value(),
-  ) as _i10.Future<void>);
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
 
   @override
-  _i10.Future<void> updateOverhead(int? basisPoints) => (super.noSuchMethod(
+  _i11.Future<void> updateOverhead(int? basisPoints) => (super.noSuchMethod(
     Invocation.method(#updateOverhead, [basisPoints]),
-    returnValue: _i10.Future<void>.value(),
-    returnValueForMissingStub: _i10.Future<void>.value(),
-  ) as _i10.Future<void>);
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
 }
 
 /// A class which mocks [PriceItemsRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPriceItemsRepository extends _i1.Mock
-    implements _i25.PriceItemsRepository {
+    implements _i26.PriceItemsRepository {
   @override
-  _i10.Future<List<_i8.PriceItem>> fetchAll() => (super.noSuchMethod(
+  _i11.Future<List<_i8.PriceItem>> fetchAll() => (super.noSuchMethod(
     Invocation.method(#fetchAll, []),
-    returnValue: _i10.Future<List<_i8.PriceItem>>.value(<_i8.PriceItem>[]),
-    returnValueForMissingStub: _i10.Future<List<_i8.PriceItem>>.value(
+    returnValue: _i11.Future<List<_i8.PriceItem>>.value(<_i8.PriceItem>[]),
+    returnValueForMissingStub: _i11.Future<List<_i8.PriceItem>>.value(
       <_i8.PriceItem>[],
     ),
-  ) as _i10.Future<List<_i8.PriceItem>>);
+  ) as _i11.Future<List<_i8.PriceItem>>);
 
   @override
-  _i10.Future<_i7.PriceItemPage> fetchPage({
+  _i11.Future<_i7.PriceItemPage> fetchPage({
     required int? page,
     required int? pageSize,
   }) => (super.noSuchMethod(
     Invocation.method(#fetchPage, [], {#page: page, #pageSize: pageSize}),
-    returnValue: _i10.Future<_i7.PriceItemPage>.value(
+    returnValue: _i11.Future<_i7.PriceItemPage>.value(
       _FakePriceItemPage_5(
         this,
         Invocation.method(#fetchPage, [], {#page: page, #pageSize: pageSize}),
       ),
     ),
-    returnValueForMissingStub: _i10.Future<_i7.PriceItemPage>.value(
+    returnValueForMissingStub: _i11.Future<_i7.PriceItemPage>.value(
       _FakePriceItemPage_5(
         this,
         Invocation.method(#fetchPage, [], {#page: page, #pageSize: pageSize}),
       ),
     ),
-  ) as _i10.Future<_i7.PriceItemPage>);
+  ) as _i11.Future<_i7.PriceItemPage>);
 
   @override
-  _i10.Future<_i8.PriceItem> create(_i7.CreatePriceItemCommand? command) =>
+  _i11.Future<_i8.PriceItem> create(_i7.CreatePriceItemCommand? command) =>
       (super.noSuchMethod(
         Invocation.method(#create, [command]),
-        returnValue: _i10.Future<_i8.PriceItem>.value(
+        returnValue: _i11.Future<_i8.PriceItem>.value(
           _FakePriceItem_6(this, Invocation.method(#create, [command])),
         ),
-        returnValueForMissingStub: _i10.Future<_i8.PriceItem>.value(
+        returnValueForMissingStub: _i11.Future<_i8.PriceItem>.value(
           _FakePriceItem_6(this, Invocation.method(#create, [command])),
         ),
-      ) as _i10.Future<_i8.PriceItem>);
+      ) as _i11.Future<_i8.PriceItem>);
 
   @override
-  _i10.Future<_i8.PriceItem> update(_i7.UpdatePriceItemCommand? command) =>
+  _i11.Future<_i8.PriceItem> update(_i7.UpdatePriceItemCommand? command) =>
       (super.noSuchMethod(
         Invocation.method(#update, [command]),
-        returnValue: _i10.Future<_i8.PriceItem>.value(
+        returnValue: _i11.Future<_i8.PriceItem>.value(
           _FakePriceItem_6(this, Invocation.method(#update, [command])),
         ),
-        returnValueForMissingStub: _i10.Future<_i8.PriceItem>.value(
+        returnValueForMissingStub: _i11.Future<_i8.PriceItem>.value(
           _FakePriceItem_6(this, Invocation.method(#update, [command])),
         ),
-      ) as _i10.Future<_i8.PriceItem>);
+      ) as _i11.Future<_i8.PriceItem>);
 
   @override
-  _i10.Future<void> delete(String? id) => (super.noSuchMethod(
+  _i11.Future<void> delete(String? id) => (super.noSuchMethod(
     Invocation.method(#delete, [id]),
-    returnValue: _i10.Future<void>.value(),
-    returnValueForMissingStub: _i10.Future<void>.value(),
-  ) as _i10.Future<void>);
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
+}
+
+/// A class which mocks [ProjectsRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockProjectsRepository extends _i1.Mock
+    implements _i27.ProjectsRepository {
+  @override
+  _i11.Future<_i9.ProjectPage> fetchPage({
+    required _i28.ProjectView? view,
+    required int? page,
+    required int? pageSize,
+  }) => (super.noSuchMethod(
+    Invocation.method(#fetchPage, [], {
+      #view: view,
+      #page: page,
+      #pageSize: pageSize,
+    }),
+    returnValue: _i11.Future<_i9.ProjectPage>.value(
+      _FakeProjectPage_7(
+        this,
+        Invocation.method(#fetchPage, [], {
+          #view: view,
+          #page: page,
+          #pageSize: pageSize,
+        }),
+      ),
+    ),
+    returnValueForMissingStub: _i11.Future<_i9.ProjectPage>.value(
+      _FakeProjectPage_7(
+        this,
+        Invocation.method(#fetchPage, [], {
+          #view: view,
+          #page: page,
+          #pageSize: pageSize,
+        }),
+      ),
+    ),
+  ) as _i11.Future<_i9.ProjectPage>);
+
+  @override
+  _i11.Future<List<_i9.ProjectRow>> fetchAll({
+    required _i28.ProjectView? view,
+  }) => (super.noSuchMethod(
+    Invocation.method(#fetchAll, [], {#view: view}),
+    returnValue: _i11.Future<List<_i9.ProjectRow>>.value(<_i9.ProjectRow>[]),
+    returnValueForMissingStub: _i11.Future<List<_i9.ProjectRow>>.value(
+      <_i9.ProjectRow>[],
+    ),
+  ) as _i11.Future<List<_i9.ProjectRow>>);
+
+  @override
+  _i11.Future<_i9.ProjectRow?> fetchOne(String? projectId) =>
+      (super.noSuchMethod(
+        Invocation.method(#fetchOne, [projectId]),
+        returnValue: _i11.Future<_i9.ProjectRow?>.value(),
+        returnValueForMissingStub: _i11.Future<_i9.ProjectRow?>.value(),
+      ) as _i11.Future<_i9.ProjectRow?>);
+
+  @override
+  _i11.Future<String> create(_i9.CreateProjectCommand? command) =>
+      (super.noSuchMethod(
+        Invocation.method(#create, [command]),
+        returnValue: _i11.Future<String>.value(
+          _i18.dummyValue<String>(this, Invocation.method(#create, [command])),
+        ),
+        returnValueForMissingStub: _i11.Future<String>.value(
+          _i18.dummyValue<String>(this, Invocation.method(#create, [command])),
+        ),
+      ) as _i11.Future<String>);
+
+  @override
+  _i11.Future<void> archive(String? projectId) => (super.noSuchMethod(
+    Invocation.method(#archive, [projectId]),
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
+
+  @override
+  _i11.Future<void> unarchive(String? projectId) => (super.noSuchMethod(
+    Invocation.method(#unarchive, [projectId]),
+    returnValue: _i11.Future<void>.value(),
+    returnValueForMissingStub: _i11.Future<void>.value(),
+  ) as _i11.Future<void>);
 }

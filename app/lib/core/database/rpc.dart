@@ -8,6 +8,9 @@ abstract final class Rpc {
   static const addAppointment = 'add_appointment';
   static const updateAppointment = 'update_appointment';
   static const removeAppointment = 'remove_appointment';
+  static const createProject = 'create_project';
+  static const archiveProject = 'archive_project';
+  static const unarchiveProject = 'unarchive_project';
 
   static const pName = 'p_name';
   static const pCode = 'p_code';
@@ -18,4 +21,10 @@ abstract final class Rpc {
   static const pStartsAt = 'p_starts_at';
   static const pDurationMinutes = 'p_duration_minutes';
   static const pNotes = 'p_notes';
+  static const pTitle = 'p_title';
+  static const pSiteStreet = 'p_site_street';
+  static const pSiteCity = 'p_site_city';
+  static const pSiteState = 'p_site_state';
+  static const pSiteZip = 'p_site_zip';
+  static const pProjectId = 'p_project_id';
 }

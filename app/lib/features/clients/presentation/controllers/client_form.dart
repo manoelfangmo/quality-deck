@@ -19,6 +19,9 @@ part 'client_form.g.dart';
 @riverpod
 class ClientFormController extends _$ClientFormController {
   late ClientFormState _initial;
+  Client? _savedClient;
+
+  Client? get savedClient => _savedClient;
 
   @override
   ClientFormState build({Client? client}) {
@@ -186,6 +189,7 @@ class ClientFormController extends _$ClientFormController {
       ref.invalidate(allClientsProvider);
       ref.invalidate(clientAppointmentProvider(result.client.id));
 
+      _savedClient = result.client;
       if (!result.ok) {
         final saved = ClientFormState.fromClient(result.client);
         _initial = saved;

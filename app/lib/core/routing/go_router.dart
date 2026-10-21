@@ -15,6 +15,7 @@ import 'package:app/features/business/presentation/onboarding_page.dart';
 import 'package:app/features/clients/presentation/clients_page.dart';
 import 'package:app/features/pricing/presentation/pricing_page.dart';
 import 'package:app/features/projects/presentation/projects_page.dart';
+import 'package:app/features/projects/presentation/routes.dart';
 import 'package:app/features/settings/presentation/routes.dart';
 
 part 'go_router.g.dart';
@@ -74,6 +75,12 @@ GoRouter goRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.projects,
                 builder: (context, state) => const ProjectsPage(),
+                routes: [
+                  GoRoute(
+                    path: ':${AppRoutes.projectIdParam}',
+                    builder: const ProjectRoute().builder,
+                  ),
+                ],
               ),
             ],
           ),

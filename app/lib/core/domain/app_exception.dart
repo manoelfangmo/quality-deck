@@ -28,6 +28,10 @@ class AppException implements Exception {
         'This client already has an appointment. Edit or remove it first.',
     'price_item_not_found':
         'This item was deleted. Refresh to see the latest list.',
+    'project_not_found':
+        "This project couldn't be found. Refresh and try again.",
+    'project_already_archived': 'This project is already archived.',
+    'project_not_archived': "This project isn't archived.",
   };
 
   const AppException.clientNotFound()
@@ -50,6 +54,18 @@ class AppException implements Exception {
   const AppException.priceItemNotFound()
     : message = 'This item was deleted. Refresh to see the latest list.',
       token = 'price_item_not_found';
+
+  const AppException.projectNotFound()
+    : message = "This project couldn't be found. Refresh and try again.",
+      token = 'project_not_found';
+
+  const AppException.projectAlreadyArchived()
+    : message = 'This project is already archived.',
+      token = 'project_already_archived';
+
+  const AppException.projectNotArchived()
+    : message = "This project isn't archived.",
+      token = 'project_not_archived';
 
   factory AppException.fromToken(String token) {
     return AppException(_copy[token] ?? 'Something went wrong.', token: token);

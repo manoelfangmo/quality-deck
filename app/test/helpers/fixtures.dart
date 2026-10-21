@@ -13,6 +13,7 @@ import 'package:app/core/domain/pricing_type.dart';
 import 'package:app/features/clients/domain/client.dart';
 import 'package:app/features/pricing/domain/price_item.dart';
 import 'package:app/features/pricing/domain/pricing_settings.dart';
+import 'package:app/features/projects/data/models.dart';
 import 'package:app/features/scheduling/domain/appointment.dart';
 import 'package:app/features/scheduling/domain/appointment_draft.dart';
 
@@ -168,6 +169,89 @@ final permitFiling = PriceItem(
   pricingType: PricingType.fixed,
   price: const Money(35000),
   updatedAt: DateTime.utc(2026, 10, 15),
+);
+
+final melgarOak = ProjectRow(
+  id: 'project-melgar',
+  title: 'Melgar – 12 Oak St',
+  createdAt: DateTime.utc(2026, 10, 20),
+  siteAddress: const Address(
+    street: '12 Oak St',
+    city: 'Bowie',
+    state: 'MD',
+    zip: '20715',
+  ),
+  clientId: anaMelgar.id,
+  clientName: anaMelgar.fullName,
+  clientPhone: anaMelgar.phone,
+  clientRemoved: false,
+  appointmentStartsAt: DateTime.utc(2026, 10, 23, 13),
+  appointmentDurationMinutes: 60,
+);
+
+final whitakerPast = ProjectRow(
+  id: 'project-whitaker',
+  title: 'Whitaker – 200 Pine St',
+  createdAt: DateTime.utc(2026, 10, 18),
+  siteAddress: const Address(
+    street: '200 Pine St',
+    city: 'Bowie',
+    state: 'MD',
+    zip: '20715',
+  ),
+  clientId: jamesWhitaker.id,
+  clientName: jamesWhitaker.fullName,
+  clientPhone: jamesWhitaker.phone,
+  clientRemoved: false,
+  appointmentStartsAt: DateTime.utc(2026, 10, 3, 14),
+  appointmentDurationMinutes: 90,
+);
+
+final noAppointmentRow = ProjectRow(
+  id: 'project-none',
+  title: 'Shah – 5 Maple St',
+  createdAt: DateTime.utc(2026, 10, 15),
+  siteAddress: const Address(
+    street: '5 Maple St',
+    city: 'Laurel',
+    state: 'MD',
+    zip: '20707',
+  ),
+  clientId: 'client-priya',
+  clientName: 'Priya Shah',
+  clientRemoved: false,
+);
+
+final removedClientRow = ProjectRow(
+  id: 'project-removed',
+  title: 'One – 1 Retired Rd',
+  createdAt: DateTime.utc(2026, 10, 10),
+  siteAddress: const Address(
+    street: '1 Retired Rd',
+    city: 'Bowie',
+    state: 'MD',
+    zip: '20715',
+  ),
+  clientId: 'client-old',
+  clientName: 'Old Client One',
+  clientRemoved: true,
+);
+
+final archivedMelgar = ProjectRow(
+  id: 'project-archived',
+  title: 'Melgar – 99 Archive St',
+  createdAt: DateTime.utc(2026, 10, 1),
+  archivedAt: DateTime.utc(2026, 10, 18),
+  siteAddress: const Address(
+    street: '99 Archive St',
+    city: 'Bowie',
+    state: 'MD',
+    zip: '20715',
+  ),
+  clientId: anaMelgar.id,
+  clientName: anaMelgar.fullName,
+  clientPhone: anaMelgar.phone,
+  clientRemoved: false,
 );
 
 class FakeCurrentUser extends CurrentUser {

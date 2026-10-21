@@ -47,6 +47,20 @@ Then run the tenancy assertions:
 docker exec -i supabase_db_field-notes psql -U postgres -v ON_ERROR_STOP=1 < supabase/tests/rls_check.sql
 ```
 
+## Contract tests
+
+Repository methods that talk to Postgres are covered by contract tests against
+local Supabase, not mocks. The playbook is [app/contract_test/README.md](app/contract_test/README.md).
+
+```sh
+cp app/example.contract_test.env app/contract_test.env
+cd app
+flutter test contract_test/ --dart-define-from-file contract_test.env
+```
+
+`app/example.contract_test.env` already has the local-demo URL, anon key, and
+service-role key from `supabase status`.
+
 ## Auth settings
 
 Recorded here so the hosted project matches local `supabase/config.toml`:

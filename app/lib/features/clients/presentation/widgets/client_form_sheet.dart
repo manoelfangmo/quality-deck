@@ -13,19 +13,18 @@ import 'package:app/features/clients/presentation/models/client_form_state.dart'
 import 'package:app/features/scheduling/presentation/widgets/add_appointment_section.dart';
 import 'package:app/features/scheduling/presentation/widgets/client_appointment_section.dart';
 
-Future<bool> showClientForm(BuildContext context, {Client? client}) async {
+Future<Client?> showClientForm(BuildContext context, {Client? client}) async {
   final wide = MediaQuery.sizeOf(context).width >= Breakpoints.wide;
   if (wide) {
-    final result = await showDialog<bool>(
+    return showDialog<Client>(
       context: context,
       barrierDismissible: false,
       builder: (context) => ClientFormSheet(client: client),
     );
-    return result ?? false;
   }
 
   final height = MediaQuery.sizeOf(context).height;
-  final result = await showModalBottomSheet<bool>(
+  return showModalBottomSheet<Client>(
     context: context,
     isScrollControlled: true,
     enableDrag: false,
@@ -36,7 +35,6 @@ Future<bool> showClientForm(BuildContext context, {Client? client}) async {
       child: ClientFormSheet(client: client),
     ),
   );
-  return result ?? false;
 }
 
 class ClientFormSheet extends ConsumerStatefulWidget {
@@ -97,7 +95,7 @@ class _ClientFormSheetState extends ConsumerState<ClientFormSheet> {
       );
       if (!discard) return;
     }
-    if (mounted) Navigator.of(context).pop(false);
+    if (mounted) Navigator.of(context).pop();
   }
 
   Future<void> _save() async {
@@ -115,7 +113,7 @@ class _ClientFormSheetState extends ConsumerState<ClientFormSheet> {
               : 'Client added')
         : (addingAppointment ? 'Appointment added' : 'Client updated');
     AppSnackbars.show(context, message);
-    Navigator.of(context).pop(true);
+    Navigator.of(context).pop(_form.savedClient);
   }
 
   Widget _appointmentSection(ClientFormState form) {

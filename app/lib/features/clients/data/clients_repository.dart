@@ -48,6 +48,26 @@ class ClientsRepository {
     return rows.map(Client.fromJson).toList();
   }
 
+  /// Active clients matching [query] on name or phone, ordered by name.
+  Future<List<Client>> search(String query, {int limit = 20}) async {
+    final trimmed = query.trim();
+    var q = _supabase.from(ClientRowsView.name).select();
+    if (trimmed.isNotEmpty) {
+      final pattern = '%$trimmed%';
+      final digits = trimmed.replaceAll(RegExp(r'\D'), '');
+      if (digits.isNotEmpty) {
+        q = q.or(
+          '${ClientsTable.fullName}.ilike.$pattern,'
+          '${ClientsTable.phone}.ilike.%$digits%',
+        );
+      } else {
+        q = q.ilike(ClientsTable.fullName, pattern);
+      }
+    }
+    final rows = await q.order(ClientsTable.fullName).limit(limit);
+    return rows.map(Client.fromJson).toList();
+  }
+
   Future<Client> create(CreateClientCommand command) async {
     try {
       final row = await _supabase

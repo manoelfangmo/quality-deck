@@ -46,3 +46,7 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Contract-test dart-defines (copy from example.contract_test.env)
+contract_test.env
+

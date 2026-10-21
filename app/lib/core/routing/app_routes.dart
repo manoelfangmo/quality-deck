@@ -10,6 +10,9 @@ abstract final class AppRoutes {
 
   static const fromParam = 'from';
   static const emailParam = 'email';
+  static const projectIdParam = 'projectId';
+
+  static String project(String projectId) => '$projects/$projectId';
 
   static const publicRoutes = [signIn, signUp, checkEmail];
 }

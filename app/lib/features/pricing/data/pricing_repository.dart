@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -38,22 +37,26 @@ class PricingRepository {
 
   Future<void> updateLaborRate(int cents) async {
     try {
-      await _supabase.from(PricingSettingsTable.name).update({
-        PricingSettingsTable.laborRateCents: cents,
-      });
+      await _updateSettings({PricingSettingsTable.laborRateCents: cents});
     } catch (error, stackTrace) {
-      debugPrint('error: $error');
       AppException.throwFrom(error, stackTrace);
     }
   }
 
   Future<void> updateOverhead(int basisPoints) async {
     try {
-      await _supabase.from(PricingSettingsTable.name).update({
-        PricingSettingsTable.overheadBps: basisPoints,
-      });
+      await _updateSettings({PricingSettingsTable.overheadBps: basisPoints});
     } catch (error, stackTrace) {
       AppException.throwFrom(error, stackTrace);
     }
+  }
+
+  /// PostgREST rejects an unfiltered PATCH. RLS still limits the row to the
+  /// caller's business; this predicate only satisfies the WHERE requirement.
+  Future<void> _updateSettings(Map<String, Object> values) {
+    return _supabase
+        .from(PricingSettingsTable.name)
+        .update(values)
+        .not(PricingSettingsTable.businessId, 'is', null);
   }
 }

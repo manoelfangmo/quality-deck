@@ -48,6 +48,12 @@ declare
   other_appt uuid := '00000000-0000-4000-8000-000000000241';
   qd_item_id uuid := '00000000-0000-4000-8000-000000000301';
   other_item_id uuid := '00000000-0000-4000-8000-000000000341';
+  qd_project_id uuid := '00000000-0000-4000-8000-000000000401';
+  qd_james_project uuid := '00000000-0000-4000-8000-000000000403';
+  qd_priya_project uuid := '00000000-0000-4000-8000-000000000405';
+  qd_removed_client_project uuid := '00000000-0000-4000-8000-000000000406';
+  qd_archived_id uuid := '00000000-0000-4000-8000-000000000426';
+  other_project_id uuid := '00000000-0000-4000-8000-000000000441';
   v_count int;
   v_id uuid;
   v_labor bigint;
@@ -57,6 +63,10 @@ declare
   v_deleted_at timestamptz;
   v_deleted_by uuid;
   v_appt_id uuid;
+  v_archived_at timestamptz;
+  v_archived_by uuid;
+  v_title text;
+  v_removed boolean;
 begin
   -- Quality Deck owner sees Quality Deck and both its users; not Other Co.
   perform public._test_as_user(owner_id);
@@ -640,6 +650,206 @@ begin
     when sqlstate '42501' then null;
   end;
 
+  -- Projects / project_rows: isolation, RPCs, constraints, no direct writes.
+  perform public._test_as_user(other_id);
+  select count(*) into v_count from public.projects;
+  assert v_count = 2, 'Other Co should see only its own projects';
+  assert not exists (
+    select 1 from public.projects
+    where id in (
+      qd_project_id, qd_james_project, qd_priya_project,
+      qd_removed_client_project, qd_archived_id
+    )
+  ), 'Other Co must not see Quality Deck projects';
+  select count(*) into v_count from public.project_rows;
+  assert v_count = 2, 'Other Co should see only its own project_rows';
+  assert not exists (
+    select 1 from public.project_rows where id = qd_project_id
+  ), 'Other Co must not see Quality Deck project_rows';
+  begin
+    perform public.archive_project(qd_project_id);
+    raise exception 'archive_project on another business should fail';
+  exception
+    when sqlstate 'Q0070' then null;
+  end;
+  begin
+    perform public.unarchive_project(qd_project_id);
+    raise exception 'unarchive_project on another business should fail';
+  exception
+    when sqlstate 'Q0070' then null;
+  end;
+  begin
+    perform public.create_project(
+      qd_client_id, 'Sneaky', '1 Oak St', 'Bowie', 'MD', '20715'
+    );
+    raise exception 'create_project for another business client should fail';
+  exception
+    when sqlstate 'Q0040' then null;
+  end;
+
+  perform public._test_as_user(owner_id);
+  select count(*) into v_count from public.projects;
+  assert v_count = 30, 'owner should see 25 active + 5 archived Quality Deck projects';
+  assert not exists (
+    select 1 from public.projects where id = other_project_id
+  ), 'owner must not see Other Co projects';
+  select count(*) into v_count from public.project_rows;
+  assert v_count = 30, 'owner should see 30 project_rows';
+
+  assert (
+    select client_name from public.project_rows where id = qd_project_id
+  ) = 'Ana Melgar', 'project_rows should show the client name';
+  assert (
+    select client_removed from public.project_rows
+    where id = qd_removed_client_project
+  ) is true, 'project_rows should mark a removed client';
+  assert (
+    select appointment_starts_at from public.project_rows
+    where id = qd_james_project
+  ) is not null, 'James''s project should show his active appointment';
+  assert (
+    select appointment_starts_at from public.project_rows
+    where id = qd_priya_project
+  ) is null, 'Priya''s removed appointment must not appear on project_rows';
+  assert (
+    select appointment_starts_at from public.project_rows
+    where id = qd_removed_client_project
+  ) is null, 'a removed client''s project should have no appointment';
+
+  begin
+    perform public.create_project(
+      other_client_id, 'No', '1 Oak St', 'Bowie', 'MD', '20715'
+    );
+    raise exception 'create_project for another business client should fail';
+  exception
+    when sqlstate 'Q0040' then null;
+  end;
+
+  begin
+    perform public.create_project(
+      qd_removed_id, 'No', '1 Oak St', 'Bowie', 'MD', '20715'
+    );
+    raise exception 'create_project for a removed client should fail';
+  exception
+    when sqlstate 'Q0040' then null;
+  end;
+
+  begin
+    insert into public.projects (
+      client_id, title, site_street, site_city, site_state, site_zip
+    ) values (
+      qd_client_megan, 'Direct', '1 Oak St', 'Bowie', 'MD', '20715'
+    );
+    raise exception 'direct project insert should fail';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  begin
+    update public.projects set title = 'Hacked' where id = qd_project_id;
+    raise exception 'direct project update should fail';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  begin
+    delete from public.projects where id = qd_project_id;
+    raise exception 'direct project delete should fail';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  v_id := public.create_project(
+    qd_client_megan, '  Megan – 9 Test St  ', '  9 Test St  ', '  Bowie  ',
+    'md', '20715'
+  );
+  assert v_id is not null, 'create_project should return an id';
+  select title into v_title from public.projects where id = v_id;
+  assert v_title = 'Megan – 9 Test St', 'create_project should trim the title';
+  assert (
+    select site_state from public.projects where id = v_id
+  ) = 'MD', 'create_project should upper-case the state';
+  assert (
+    select archived_at from public.projects where id = v_id
+  ) is null, 'a new project should be active';
+
+  perform public.archive_project(v_id);
+  select archived_at, archived_by into v_archived_at, v_archived_by
+  from public.projects
+  where id = v_id;
+  assert v_archived_at is not null, 'archive_project should set archived_at';
+  assert v_archived_by = owner_id, 'archive_project should set archived_by';
+
+  begin
+    perform public.archive_project(v_id);
+    raise exception 'second archive_project should fail';
+  exception
+    when sqlstate 'Q0071' then null;
+  end;
+
+  perform public.unarchive_project(v_id);
+  select archived_at, archived_by into v_archived_at, v_archived_by
+  from public.projects
+  where id = v_id;
+  assert v_archived_at is null, 'unarchive_project should clear archived_at';
+  assert v_archived_by is null, 'unarchive_project should clear archived_by';
+
+  begin
+    perform public.unarchive_project(v_id);
+    raise exception 'second unarchive_project should fail';
+  exception
+    when sqlstate 'Q0072' then null;
+  end;
+
+  begin
+    perform public.create_project(
+      qd_client_megan, '   ', '1 Oak St', 'Bowie', 'MD', '20715'
+    );
+    raise exception 'blank title should fail';
+  exception
+    when check_violation then null;
+  end;
+
+  begin
+    perform public.create_project(
+      qd_client_megan, 'No Street', '', 'Bowie', 'MD', '20715'
+    );
+    raise exception 'missing site street should fail';
+  exception
+    when check_violation then null;
+  end;
+
+  begin
+    perform public.create_project(
+      qd_client_megan, 'Bad State', '1 Oak St', 'Bowie', 'M', '20715'
+    );
+    raise exception 'bad state should fail';
+  exception
+    when check_violation then null;
+  end;
+
+  begin
+    perform public.create_project(
+      qd_client_megan, 'Bad Zip', '1 Oak St', 'Bowie', 'MD', '207'
+    );
+    raise exception 'bad zip should fail';
+  exception
+    when check_violation then null;
+  end;
+
+  -- After Ana is removed, her projects stay and are marked (removed),
+  -- with no appointment (remove_client also removes it).
+  assert (
+    select client_removed from public.project_rows where id = qd_project_id
+  ) is true, 'a removed client''s project should stay and mark client_removed';
+  assert (
+    select appointment_starts_at from public.project_rows
+    where id = qd_project_id
+  ) is null, 'a removed client''s appointment should not appear on project_rows';
+
   -- anon sees zero rows / has no access.
   perform set_config('role', 'anon', true);
   begin
@@ -709,6 +919,22 @@ begin
   begin
     select count(*) into v_count from public.price_items;
     assert v_count = 0, 'anon should see 0 price_items if select is granted';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  begin
+    select count(*) into v_count from public.projects;
+    assert v_count = 0, 'anon should see 0 projects if select is granted';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  begin
+    select count(*) into v_count from public.project_rows;
+    assert v_count = 0, 'anon should see 0 project_rows if select is granted';
   exception
     when insufficient_privilege then null;
     when sqlstate '42501' then null;
