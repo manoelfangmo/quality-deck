@@ -41,34 +41,35 @@ app/lib/
 │   ├── utils/                # providers.dart (Supabase client, clock), extensions, toasts, autosave debouncer
 │   └── widgets/              # buttons, search field, tap-to-call/email/maps, empty/error states, reorder list
 └── features/
-    ├── auth/                 # AU: sign-in, sign-out, password reset
+    ├── auth/                 # AU: sign-in, sign-up, sign-out
+    ├── business/             # AU: onboarding, members, invites
     ├── clients/              # CL: client list, search, client page, duplicate check
     ├── projects/             # PJ, JB: pipeline, project page, jobs, status history
     ├── scheduling/           # SC: appointments, Google Calendar connection and sync state
     ├── onsite/               # ON: notes, measurements, deck details, photos
     ├── pricing/              # PR: price categories and items
     ├── estimates/            # ES: line items and totals on a job
-    └── settings/             # calendar connection status, sign-out
+    └── settings/             # members, invites, calendar connection, sign-out
 
 supabase/
 ├── config.toml
 ├── migrations/               # schema, RLS policies, triggers, RPC functions
 ├── functions/
 │   └── calendar-sync/        # the one Edge Function: talks to Google Calendar
-└── seed.sql                  # one business, one owner, a handful of clients and price items
+└── seed.sql                  # Quality Deck + Other Co, owners/members, invite codes
 ```
 
-Every feature uses the same four folders. A small feature can leave out `application/` when nothing needs to coordinate more than one repository. `settings` is `presentation/` only: it reads the calendar connection through `scheduling`'s repository and signs out through `auth`'s.
+Every feature uses the same four folders. A small feature can leave out `application/` when nothing needs to coordinate more than one repository. `settings` is `presentation/` only: it composes `business` widgets for members and invites, reads the calendar connection through `scheduling`'s repository, and signs out through `auth`'s.
 
 `app/lib/core/domain/` is for types that more than one feature needs. `Address` is used by clients, projects and scheduling. `Money` and `PriceUnit` are used by pricing and estimates. `Length` is used by onsite and estimates. A type used by only one feature stays in that feature's `domain/`.
 
 ## One business, walled off
 
-Every table carries `business_id`, and every RLS policy limits rows to the signed-in user's business through one SQL helper, `current_business_id()`, which reads `users.business_id` for `auth.uid()`. Part 1 has one business (Field Notes) and one user (Moises), but nothing in Dart assumes that.
+Every table carries `business_id`, and every RLS policy limits rows to the signed-in user's business through one SQL helper, `current_business_id()`, which reads `memberships.business_id` for `auth.uid()`. `users` holds only who someone is; `memberships` holds which business they belong to and their role. A user without a membership row is signed up but not in a business yet. Part 1 is one business per user (`memberships.user_id` is the primary key). Nothing in Dart assumes a particular business or that a user always has one.
 
 The app never sends `business_id`. Inserts leave it out and a column default of `current_business_id()` fills it in; RPCs read it from the caller. Repositories never filter by it either: RLS already did. If a query seems to need `.eq('business_id', …)`, the policy is wrong.
 
-`AppUser` in `core/domain/` is the signed-in user with their business and role. `currentUserProvider` in `auth` loads it once after sign-in and is `keepAlive`.
+`AppUser` in `core/domain/` is the signed-in user with an optional `Membership` (business id and role). `currentUserProvider` in `auth` loads it after sign-in, is `keepAlive`, and reloads when the tab becomes visible and every 5 minutes so a removed member is signed out promptly.
 
 ## Projects, folder by folder
 
@@ -370,9 +371,9 @@ Signed-in sections are branches of one `StatefulShellRoute` in `app/lib/core/rou
 Path strings live in `AppRoutes` (`app/lib/core/routing/app_routes.dart`). The router's `redirect` does two things:
 
 - sends signed-out users to sign-in, from any page (AU-1)
-- sends signed-in users away from sign-in and password reset
+- sends signed-in users without a business to onboarding, and signed-in users with a business away from the public pages and onboarding
 
-`AppRoutes.publicRoutes` lists the pages that work without a session: sign-in and the password-reset pages. The router is built once in a provider and refreshed through `refreshListenable` when `currentUserProvider` changes. It is never rebuilt on each change.
+`AppRoutes.publicRoutes` lists the pages that work without a session: sign-in, sign-up, and check-email. The router is built once in a provider and refreshed through `refreshListenable` when `currentUserProvider` changes. It is never rebuilt on each change.
 
 Routes that take parameters are classes in the feature, not inline `GoRoute`s. Each extends `ParamAppRoute` or `SimpleAppRoute` from `app/lib/core/routing/routing_interfaces.dart` and lives in that feature's `presentation/routes.dart`. `ProjectRoute(projectId)` and `ClientRoute(clientId)` are pushed onto whichever branch the user is in, so opening a project from the Clients tab keeps you in Clients. Settings is a `SimpleAppRoute` reached from the app bar.
 
@@ -391,7 +392,7 @@ Every screen must work in Safari on an iPhone with no sideways scrolling, and wi
 
 Features are built in this order, so each one only depends on what already exists:
 
-1. `auth`, `clients`
+1. `auth`, `business`, `clients`
 2. `pricing`, handed to Moises to start entering prices
 3. `projects` (projects and jobs)
 4. `scheduling`, which needs only clients and can run alongside step 3
@@ -404,6 +405,7 @@ The app talks to Supabase directly. There is no application server; queries, RPC
 
 Schema, RLS policies, triggers and SQL functions live in `supabase/migrations/`. Apply them with `supabase db reset` locally. Rules the database must enforce belong in SQL, called with `supabase.rpc(...)` or run as triggers:
 
+- `create_business` and `redeem_invite` are the only paths that create a membership. `create_invite`, `revoke_invite`, and `remove_member` are owner-only. The client never writes `memberships`, `businesses`, or `invites` directly.
 - `create_project` and `create_project_from_visit` create a project with its first job and any visit in one transaction.
 - `set_project_status` changes a status by hand; a trigger on `projects.status` writes every `project_status_events` row, so no path can change status without a time stamp (PJ-3).
 - A trigger on `jobs.status` moves the project to Won when any job is accepted and Lost when every job is declined (JB-2).
