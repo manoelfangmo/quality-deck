@@ -1314,6 +1314,80 @@ begin
     where id = qd_project_id
   ) is null, 'a removed client''s appointment should not appear on project_rows';
 
+  -- job_photos: members of the business can read/write; 10-per-kind limit.
+  perform public._test_as_user(owner_id);
+
+  insert into public.job_photos (
+    job_id, kind, storage_path, width, height
+  ) values (
+    qd_job_id, 'before',
+    '00000000-0000-4000-8000-000000000011/' || qd_job_id || '/rls-before.jpg',
+    100, 80
+  );
+
+  assert (
+    select count(*) from public.job_photos where job_id = qd_job_id
+  ) = 1, 'owner should see the job photo they inserted';
+
+  perform public._test_as_user(other_id);
+  assert (
+    select count(*) from public.job_photos
+  ) = 0, 'other business should see 0 job_photos';
+
+  begin
+    insert into public.job_photos (
+      job_id, kind, storage_path, width, height
+    ) values (
+      qd_job_id, 'before',
+      'other/rls.jpg', 10, 10
+    );
+    assert false, 'other business should not insert a Quality Deck photo';
+  exception
+    when sqlstate '42501' then null;
+    when insufficient_privilege then null;
+  end;
+
+  perform public._test_as_user(owner_id);
+  for v_count in 2..10 loop
+    insert into public.job_photos (
+      job_id, kind, storage_path, width, height
+    ) values (
+      qd_job_id, 'before',
+      '00000000-0000-4000-8000-000000000011/' || qd_job_id || '/rls-' || v_count || '.jpg',
+      100, 80
+    );
+  end loop;
+
+  begin
+    insert into public.job_photos (
+      job_id, kind, storage_path, width, height
+    ) values (
+      qd_job_id, 'before',
+      '00000000-0000-4000-8000-000000000011/' || qd_job_id || '/rls-11.jpg',
+      100, 80
+    );
+    assert false, 'an 11th before photo should be rejected';
+  exception
+    when sqlstate 'Q0080' then null;
+  end;
+
+  insert into public.jobs (project_id, title, job_type)
+  values (qd_project_id, 'Photo cascade', 'deck')
+  returning id into v_id;
+
+  insert into public.job_photos (
+    job_id, kind, storage_path, width, height
+  ) values (
+    v_id, 'after',
+    '00000000-0000-4000-8000-000000000011/' || v_id || '/cascade.jpg',
+    10, 10
+  );
+
+  delete from public.jobs where id = v_id;
+  assert not exists (
+    select 1 from public.job_photos where job_id = v_id
+  ), 'deleting a job should delete its photos';
+
   -- anon sees zero rows / has no access.
   perform set_config('role', 'anon', true);
   begin
@@ -1415,6 +1489,14 @@ begin
   begin
     select count(*) into v_count from public.line_items;
     assert v_count = 0, 'anon should see 0 line_items if select is granted';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  begin
+    select count(*) into v_count from public.job_photos;
+    assert v_count = 0, 'anon should see 0 job_photos if select is granted';
   exception
     when insufficient_privilege then null;
     when sqlstate '42501' then null;

@@ -89,7 +89,7 @@ class ProjectsPage extends ConsumerWidget {
                     showSearchField: false,
                     hasFlexibleRowHeight: true,
                     onTap: (row) =>
-                        context.push(ProjectRoute(row.id).location),
+                        context.go(ProjectRoute(row.id).location),
                     columns: _columns(
                       context,
                       ref,

@@ -18,6 +18,7 @@ import 'package:app/features/projects/presentation/project_page.dart';
 import 'package:app/features/projects/presentation/projects_page.dart';
 
 import '../../../helpers/fixtures.dart';
+import '../../../helpers/photo_overrides.dart';
 import '../../../mocks.dart';
 
 void main() {
@@ -89,6 +90,7 @@ void main() {
               view: ProjectView.archived,
             ),
           ),
+          ...jobPhotoTestOverrides(),
         ],
         child: MaterialApp.router(routerConfig: router),
       ),
@@ -121,7 +123,7 @@ void main() {
     expect(find.text('Archive'), findsNothing);
   });
 
-  testWidgets('a row tap pushes ProjectRoute', (tester) async {
+  testWidgets('a row tap goes to ProjectRoute with the project id in the url', (tester) async {
     final router = await pumpPage(tester);
 
     await tester.tap(find.text('Melgar – 12 Oak St'));

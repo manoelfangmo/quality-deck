@@ -77,6 +77,7 @@ app/contract_test/
   projects_repository_test.dart          # view read + create / archive / unarchive / update / overhead RPCs
   jobs_repository_test.dart              # jobs table read / write / labor
   line_items_repository_test.dart        # line RPCs: copy, override, reorder, delete
+  job_photo_repository_test.dart         # job_photos table + job-photos bucket
 app/example.contract_test.env            # committed shape; real file is gitignored
 app/dart_test.yaml                       # registers the `contract` tag
 .github/workflows/contract-tests.yml
@@ -400,8 +401,9 @@ See `.github/workflows/contract-tests.yml`.
 | `price_items_repository_test.dart` | Catalog read + create/update/delete |
 | `appointments_repository_test.dart` | Arrange via `ClientsRepository`, then RPC bound to `auth.uid()` |
 | `projects_repository_test.dart` | View read + create / archive / update / overhead RPCs |
-| `jobs_repository_test.dart` | Nested `jobs` + `line_items` read; table write; labor |
+| `jobs_repository_test.dart` | Nested `jobs` + `line_items` read; table write; labor; photo cascade |
 | `line_items_repository_test.dart` | Line RPCs; copied prices; archived and other-business errors |
+| `job_photo_repository_test.dart` | Table insert/list/count/delete; 10-per-kind; storage RLS |
 | `helpers.dart` | Direct `SupabaseClient`, seeded sign-in, reusable arrange |
 | `clean_up.dart` | User delete, row snapshot/restore |
 | `.github/workflows/contract-tests.yml` | Local Supabase, same-repo schema, no browser |

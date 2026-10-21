@@ -29,6 +29,7 @@ class ContractCleanup {
   final List<String> _projects = [];
   final List<String> _invites = [];
   final List<SupabaseClient> _sessions = [];
+  final List<({String bucket, String path})> _storageObjects = [];
 
   Map<String, dynamic>? _pricing;
   String? _businessName;
@@ -49,6 +50,10 @@ class ContractCleanup {
   void trackInvite(String inviteId) => _invites.add(inviteId);
 
   void trackSession(SupabaseClient client) => _sessions.add(client);
+
+  void trackStorageObject({required String bucket, required String path}) {
+    _storageObjects.add((bucket: bucket, path: path));
+  }
 
   void trackSignedUp(SignedInSession session) {
     trackUser(session.userId);
@@ -91,7 +96,10 @@ class ContractCleanup {
 
     for (final id in List<String>.from(_projects)) {
       await _try('delete project $id', () {
-        return _admin.from(ProjectsTable.name).delete().eq(ProjectsTable.id, id);
+        return _admin
+            .from(ProjectsTable.name)
+            .delete()
+            .eq(ProjectsTable.id, id);
       });
     }
     _projects.clear();
@@ -146,15 +154,21 @@ class ContractCleanup {
       await _try('clear invite used_by $id', () {
         return _admin
             .from(InvitesTable.name)
-            .update({
-              InvitesTable.usedBy: null,
-              InvitesTable.usedAt: null,
-            })
+            .update({InvitesTable.usedBy: null, InvitesTable.usedAt: null})
             .eq(InvitesTable.usedBy, id);
       });
       await _try('delete user $id', () => _admin.auth.admin.deleteUser(id));
     }
     _users.clear();
+
+    for (final object in List<({String bucket, String path})>.from(
+      _storageObjects,
+    )) {
+      await _try('delete storage ${object.bucket}/${object.path}', () async {
+        await _admin.storage.from(object.bucket).remove([object.path]);
+      });
+    }
+    _storageObjects.clear();
 
     await _restorePricingSettings();
     await _restoreBusinessName();

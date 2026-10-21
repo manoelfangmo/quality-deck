@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:app/features/auth/presentation/widgets/auth_scaffold.dart';
 import 'package:app/features/auth/presentation/widgets/sign_up_form.dart';
 
 class SignUpPage extends StatelessWidget {
@@ -7,14 +8,10 @@ class SignUpPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Create account')),
-      body: const SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(24),
-          child: SignUpForm(),
-        ),
-      ),
+    return const AuthScaffold(
+      title: 'Create account',
+      subtitle: 'Set up your Field Notes account.',
+      child: SignUpForm(),
     );
   }
 }

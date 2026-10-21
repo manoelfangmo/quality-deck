@@ -16,6 +16,7 @@ import 'package:app/features/estimates/presentation/widgets/labor_row.dart';
 import 'package:app/features/estimates/presentation/widgets/labor_sheet.dart';
 import 'package:app/features/estimates/presentation/widgets/line_form_sheet.dart';
 import 'package:app/features/estimates/presentation/widgets/line_item_list.dart';
+import 'package:app/features/onsite/presentation/widgets/job_photo_galleries.dart';
 import 'package:app/features/pricing/presentation/controllers/pricing_settings.dart';
 
 class JobCard extends ConsumerWidget {
@@ -33,15 +34,13 @@ class JobCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final job = jobWithLines.job;
-    final hidden = ref.watch(lineRemovalControllerProvider(projectId)).hiddenIds;
+    final hidden = ref
+        .watch(lineRemovalControllerProvider(projectId))
+        .hiddenIds;
     final reorder = ref.watch(
       lineReorderControllerProvider(projectId: projectId, jobId: job.id),
     );
-    final visible = _visibleLines(
-      jobWithLines.lines,
-      hidden,
-      reorder.ids,
-    );
+    final visible = _visibleLines(jobWithLines.lines, hidden, reorder.ids);
     final displayed = JobWithLines(job: job, lines: visible);
     final theme = Theme.of(context);
 
@@ -152,6 +151,8 @@ class JobCard extends ConsumerWidget {
                 ],
               ),
             ],
+            const SizedBox(height: 16),
+            JobPhotoGalleries(jobId: job.id, readOnly: readOnly),
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerRight,
@@ -202,7 +203,10 @@ List<LineItem> _visibleLines(
           for (final id in optimisticIds)
             if (byId[id] != null) byId[id]!,
         ];
-  return [for (final line in ordered) if (!hidden.contains(line.id)) line];
+  return [
+    for (final line in ordered)
+      if (!hidden.contains(line.id)) line,
+  ];
 }
 
 class _ExpandableDescription extends StatefulWidget {

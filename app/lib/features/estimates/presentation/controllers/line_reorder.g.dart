@@ -59,7 +59,7 @@ final class LineReorderControllerProvider
 }
 
 String _$lineReorderControllerHash() =>
-    r'd328b0da71cad7ac23d1b6b0034c6b34150d9f20';
+    r'f9a57badb7fe723db04a7cf2207912248b23fca3';
 
 final class LineReorderControllerFamily extends $Family
     with

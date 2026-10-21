@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Field Notes uses the camera so you can take before, after, and concept photos for a job.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Field Notes uses your photo library so you can attach job photos. The system picker is used and photos are not accessed in the background.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

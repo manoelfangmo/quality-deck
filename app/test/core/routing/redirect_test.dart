@@ -112,4 +112,14 @@ void main() {
       isNull,
     );
   });
+
+  test('business user on a project details path stays', () {
+    expect(
+      redirect(
+        AuthSnapshot.signedIn(ownerUser),
+        Uri.parse(AppRoutes.project('project-1')),
+      ),
+      isNull,
+    );
+  });
 }

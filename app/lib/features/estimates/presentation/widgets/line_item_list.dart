@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:app/core/utils/toasts.dart';
@@ -32,9 +35,8 @@ class LineItemList extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(44, 8, 0, 8),
         child: Text(
           'No line items yet.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       );
     }
@@ -89,6 +91,27 @@ class LineItemList extends ConsumerWidget {
               oldIndex: oldIndex,
               newIndex: newIndex,
             );
+      },
+      proxyDecorator: (child, index, animation) {
+        final scheme = Theme.of(context).colorScheme;
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            final t = Curves.easeOutCubic.transform(animation.value);
+            return Transform.scale(
+              scale: lerpDouble(1.0, 1.04, t)!,
+              child: Material(
+                elevation: lerpDouble(0, 12, t)!,
+                color: scheme.surfaceContainerHigh, // opaque so rows underneath don't show through
+                shadowColor: Colors.black.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(12),
+                clipBehavior: Clip.antiAlias,
+                child: child,
+              ),
+            );
+          },
+          child: child,
+        );
       },
       itemBuilder: (context, index) {
         final item = lines[index];

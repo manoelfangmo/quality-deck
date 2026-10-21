@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:clock/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:app/core/constants/environment.dart';
 import 'package:app/core/utils/local_store.dart';
@@ -97,6 +101,17 @@ void validateContractTestEnv() {
 
 int uniqueStamp() => DateTime.now().microsecondsSinceEpoch;
 
+String uniqueUuid() => const Uuid().v4();
+
+/// Minimal 1×1 JPEG used as a storage upload fixture.
+final Uint8List jpeg1x1 = Uint8List.fromList(
+  base64Decode(
+    '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkS'
+    'Ew8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAAB'
+    'AAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAAA//aAAgBAQAAPwBKKP/Z',
+  ),
+);
+
 /// Direct SDK client. Implicit flow avoids PKCE, which needs the async
 /// storage that only `Supabase.initialize()` installs.
 SupabaseClient newAnonClient() {
@@ -124,6 +139,10 @@ Future<SupabaseClient> signInAs(String email, String password) async {
 
 Future<SupabaseClient> signInAsSeededOwner() {
   return signInAs(SeedUsers.ownerEmail, SeedUsers.password);
+}
+
+Future<SupabaseClient> signInAsSeededCrew() {
+  return signInAs(SeedUsers.crewEmail, SeedUsers.password);
 }
 
 Future<SupabaseClient> signInAsSeededNoBusiness() {

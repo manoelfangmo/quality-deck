@@ -8,6 +8,7 @@ import 'package:app/core/utils/providers.dart';
 import 'package:app/core/utils/toasts.dart';
 import 'package:app/features/business/presentation/controllers/current_business.dart';
 import 'package:app/features/estimates/presentation/widgets/jobs_section.dart';
+import 'package:app/features/onsite/presentation/widgets/photo_leave_scope.dart';
 import 'package:app/features/projects/data/models.dart';
 import 'package:app/features/projects/presentation/controllers/project.dart';
 import 'package:app/features/projects/presentation/controllers/project_actions.dart';
@@ -29,19 +30,14 @@ class ProjectPage extends ConsumerWidget {
         'America/New_York';
 
     return async.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (_, _) => _NotFound(onBack: () => context.go(AppRoutes.projects)),
       data: (row) {
         if (row == null) {
           return _NotFound(onBack: () => context.go(AppRoutes.projects));
         }
-        return _ProjectBody(
-          row: row,
-          now: now,
-          timeZone: timeZone,
-        );
+        return _ProjectBody(row: row, now: now, timeZone: timeZone);
       },
     );
   }
@@ -92,37 +88,41 @@ class _ProjectBody extends ConsumerWidget {
     final wide = MediaQuery.sizeOf(context).width >= Breakpoints.wide;
     final archived = row.isArchived;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(row.title),
-        actions: [ProjectAppBarActions(row: row)],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          if (archived) ...[
-            _ArchivedBanner(onUnarchive: () => _unarchive(context, ref)),
+    return PhotoLeaveScope(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(row.title),
+          actions: [ProjectAppBarActions(row: row)],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            if (archived) ...[
+              _ArchivedBanner(onUnarchive: () => _unarchive(context, ref)),
+              const SizedBox(height: 16),
+            ],
+            if (wide)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _ClientCard(row: row, now: now, timeZone: timeZone),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(child: _SiteCard(row: row)),
+                ],
+              )
+            else ...[
+              _ClientCard(row: row, now: now, timeZone: timeZone),
+              const SizedBox(height: 16),
+              _SiteCard(row: row),
+            ],
+            const SizedBox(height: 24),
+            JobsSection(projectId: row.id, readOnly: archived),
             const SizedBox(height: 16),
+            ProjectTotalCard(row: row, readOnly: archived),
           ],
-          if (wide)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: _ClientCard(row: row, now: now, timeZone: timeZone)),
-                const SizedBox(width: 16),
-                Expanded(child: _SiteCard(row: row)),
-              ],
-            )
-          else ...[
-            _ClientCard(row: row, now: now, timeZone: timeZone),
-            const SizedBox(height: 16),
-            _SiteCard(row: row),
-          ],
-          const SizedBox(height: 24),
-          JobsSection(projectId: row.id, readOnly: archived),
-          const SizedBox(height: 16),
-          ProjectTotalCard(row: row, readOnly: archived),
-        ],
+        ),
       ),
     );
   }
@@ -140,7 +140,9 @@ class _ProjectBody extends ConsumerWidget {
         },
       );
     } else if (context.mounted) {
-      final message = ref.read(projectActionsControllerProvider(row.id)).errorMessage;
+      final message = ref
+          .read(projectActionsControllerProvider(row.id))
+          .errorMessage;
       if (message != null) AppSnackbars.show(context, message);
     }
   }

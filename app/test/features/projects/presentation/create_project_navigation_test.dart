@@ -19,6 +19,7 @@ import 'package:app/features/projects/presentation/project_page.dart';
 import 'package:app/features/projects/presentation/projects_page.dart';
 
 import '../../../helpers/fixtures.dart';
+import '../../../helpers/photo_overrides.dart';
 import '../../../mocks.dart';
 
 void main() {
@@ -89,6 +90,7 @@ void main() {
           projectProvider('new-project').overrideWith(
             (ref) async => melgarOak,
           ),
+          ...jobPhotoTestOverrides(),
         ],
         child: MaterialApp.router(routerConfig: router),
       ),

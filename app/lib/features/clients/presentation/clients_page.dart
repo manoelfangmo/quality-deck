@@ -62,18 +62,16 @@ class ClientsPage extends ConsumerWidget {
                       onAdd: () => _openForm(context, ref),
                     );
                   }
-                  return SingleChildScrollView(
-                    child: PaginatedTableComponent<Client>(
-                      showSearchField: false,
-                      columns: _columns(
-                        context,
-                        ref,
-                        compact: compact,
-                        now: now,
-                        timeZone: timeZone,
-                      ),
-                      data: list,
+                  return PaginatedTableComponent<Client>(
+                    showSearchField: false,
+                    columns: _columns(
+                      context,
+                      ref,
+                      compact: compact,
+                      now: now,
+                      timeZone: timeZone,
                     ),
+                    data: list,
                   );
                 },
               ),

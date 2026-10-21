@@ -101,7 +101,7 @@ class _CreateProjectSheetState extends ConsumerState<CreateProjectSheet> {
     final router = GoRouter.of(context);
     AppSnackbars.show(context, 'Project created');
     Navigator.of(context).pop();
-    router.push(ProjectRoute(id).location);
+    router.go(ProjectRoute(id).location);
   }
 
   @override

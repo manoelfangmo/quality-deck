@@ -16,6 +16,7 @@ import 'package:app/features/projects/presentation/controllers/project.dart';
 import 'package:app/features/projects/presentation/project_page.dart';
 
 import '../../../helpers/fixtures.dart';
+import '../../../helpers/photo_overrides.dart';
 import '../../../mocks.dart';
 
 void main() {
@@ -58,6 +59,7 @@ void main() {
           pricingSettingsProvider.overrideWith(
             (ref) => ref.watch(pricingRepositoryProvider).fetchSettings(),
           ),
+          ...jobPhotoTestOverrides(),
         ],
         child: MaterialApp(home: ProjectPage(projectId: id)),
       ),
@@ -82,6 +84,8 @@ void main() {
     expect(find.text('+ Add from price list'), findsNothing);
     expect(find.text('+ Add custom line'), findsNothing);
     expect(find.text('+ Add labor'), findsNothing);
+    expect(find.text('Take photo'), findsNothing);
+    expect(find.text('Choose photos'), findsNothing);
     expect(find.byIcon(Icons.drag_handle), findsNothing);
     expect(find.byType(PopupMenuButton<String>), findsOneWidget);
   });

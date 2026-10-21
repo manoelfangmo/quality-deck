@@ -57,6 +57,7 @@ class _PaginatedTableComponentState<T extends Object>
   int? sortColumnIndex;
   bool isAscending = true;
   final scrollController = ScrollController();
+  final verticalScrollController = ScrollController();
 
   @override
   void initState() {
@@ -79,6 +80,7 @@ class _PaginatedTableComponentState<T extends Object>
     textEditingController.dispose();
     debounce?.cancel();
     scrollController.dispose();
+    verticalScrollController.dispose();
     super.dispose();
   }
 
@@ -178,245 +180,252 @@ class _PaginatedTableComponentState<T extends Object>
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
-      alignment: Alignment.center,
-      constraints: const BoxConstraints(minWidth: double.infinity),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: context.colors.onSurface.withValues(alpha: 0.1),
-        ),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(blurRadius: 10, offset: Offset(0, 4)),
-        ],
-      ),
-      child: Column(
-        children: <Widget>[
-          if (widget.showSearchField || widget.addDataButton != null) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                if (widget.showSearchField)
-                  SizedBox(
-                    width: 250,
-                    child: TextFormField(
-                      controller: textEditingController,
-                      onChanged: onSearchTextChanged,
-                      decoration: InputDecoration(
-                        hintText: widget.searchText,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: context.colors.onSurface.withValues(
-                              alpha: 0.1,
-                            ),
-                          ),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                    ),
-                  ),
-                if (widget.addDataButton != null)
-                  Flexible(child: widget.addDataButton!),
-              ],
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool boundedHeight = constraints.hasBoundedHeight;
+        final Widget table = _buildTable(context, colorScheme);
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
+          alignment: Alignment.center,
+          constraints: const BoxConstraints(minWidth: double.infinity),
+          decoration: BoxDecoration(
+            color: context.colors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: context.colors.onSurface.withValues(alpha: 0.1),
             ),
-            const SizedBox(height: 20),
-          ],
-          LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              return Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    // color: context.colors.onSurface.withValues(alpha: 0.1),
-                  ),
-                ),
-                clipBehavior: Clip.hardEdge,
-                child: Scrollbar(
-                  controller: scrollController,
-                  scrollbarOrientation: ScrollbarOrientation.bottom,
-                  interactive: true,
-                  trackVisibility: true,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minWidth: constraints.maxWidth,
-                      ),
-                      child: DataTable(
-                        columnSpacing: 10,
-                        dividerThickness: 0,
-                        dataRowMaxHeight: widget.hasFlexibleRowHeight
-                            ? double.infinity
-                            : widget.rowHeight,
-                        checkboxHorizontalMargin: 0,
-                        border: TableBorder(
-                          horizontalInside: BorderSide(
-                            color: context.colors.onSurface.withValues(
-                              alpha: 0.1,
-                            ),
-                          ),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        dataRowColor: WidgetStateProperty.all(
-                          colorScheme.surface,
-                        ),
-                        headingRowColor: WidgetStateProperty.all(
-                          context.colors.onSurface.withValues(alpha: 0.1),
-                        ),
-                        columns: <DataColumn>[
-                          ...widget.columns.mapIndexed(
-                            (index, column) => DataColumn(
-                              label: Row(
-                                children: <Widget>[
-                                  Text(
-                                    column.columnName,
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: true,
-                                  ),
-                                  if (column.enableColumnSorting)
-                                    Icon(
-                                      sortColumnIndex == index
-                                          ? (isAscending
-                                                ? Icons.arrow_upward
-                                                : Icons.arrow_downward)
-                                          : Icons.unfold_more,
-                                      size: 16,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                ],
-                              ),
-                              onSort: column.enableColumnSorting
-                                  ? (index, _) => sortByColumn(index)
-                                  : null,
-                            ),
-                          ),
-                        ],
-                        rows: List<DataRow>.generate(paginatedData.length, (
-                          int index,
-                        ) {
-                          final data = paginatedData[index];
-                          return DataRow(
-                            selected: widget.selected?.contains(index) ?? false,
-                            onSelectChanged: widget.selectable
-                                ? (bool? value) {
-                                    if (widget.onSelect != null) {
-                                      widget.onSelect!(data);
-                                    }
-                                  }
-                                : null,
-                            onLongPress: widget.onLongPress == null
-                                ? null
-                                : () => widget.onLongPress!(data),
-                            color: WidgetStateProperty.all<Color?>(
-                              hoveredRowIndex == index
-                                  ? colorScheme.surface.withValues(alpha: 0.0)
-                                  : colorScheme.surface.withValues(alpha: 0.3),
-                            ),
-                            cells: <DataCell>[
-                              ...List<DataCell>.generate(
-                                widget.columns.length,
-                                (int i) {
-                                  final column = widget.columns[i];
-                                  return DataCell(
-                                    onTap: widget.onTap == null
-                                        ? null
-                                        : () => widget.onTap!(data),
-                                    MouseRegion(
-                                      onEnter: (_) {
-                                        setState(() {
-                                          hoveredRowIndex = index;
-                                        });
-                                      },
-                                      onExit: (_) {
-                                        setState(() {
-                                          hoveredRowIndex = null;
-                                        });
-                                      },
-                                      child: ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth: 500,
-                                          minWidth: 80,
-                                        ),
-                                        child: column.onBuild == null
-                                            ? Text(data.toString())
-                                            : column.onBuild!(data),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          );
-                        }),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
+            boxShadow: const <BoxShadow>[
+              BoxShadow(blurRadius: 10, offset: Offset(0, 4)),
+            ],
           ),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Flexible(
-                  child: Text(
-                    'Showing ${paginatedData.length} of ${filteredData.length} rows',
-                  ),
-                ),
+          child: Column(
+            mainAxisSize: boundedHeight ? MainAxisSize.max : MainAxisSize.min,
+            children: <Widget>[
+              if (widget.showSearchField || widget.addDataButton != null) ...[
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: currentPage > 0
-                          ? () => setState(() => currentPage--)
-                          : null,
+                    if (widget.showSearchField)
+                      SizedBox(
+                        width: 250,
+                        child: TextFormField(
+                          controller: textEditingController,
+                          onChanged: onSearchTextChanged,
+                          decoration: InputDecoration(
+                            hintText: widget.searchText,
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: context.colors.onSurface.withValues(
+                                  alpha: 0.1,
+                                ),
+                              ),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (widget.addDataButton != null)
+                      Flexible(child: widget.addDataButton!),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (boundedHeight) Expanded(child: table) else table,
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(
+                        'Showing ${paginatedData.length} of ${filteredData.length} rows',
+                      ),
                     ),
-                    ...getDisplayedPages(
-                      currentPage,
-                      (filteredData.length / rowsPerPage).ceil(),
-                    ).map<Widget>((page) {
-                      if (page == null) {
-                        return const PageButton(
-                          pageNumber: '...',
-                          isSelected: false,
-                        );
-                      } else {
-                        final pageNumber = page;
-                        final isSelected = pageNumber == currentPage + 1;
-                        return PageButton(
-                          pageNumber: pageNumber.toString(),
-                          isSelected: isSelected,
-                          onTap: () {
-                            setState(() {
-                              currentPage =
-                                  pageNumber - 1; // Because index starts from 0
-                            });
-                          },
-                        );
-                      }
-                    }),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      onPressed:
-                          (currentPage + 1) * rowsPerPage < filteredData.length
-                          ? () => setState(() => currentPage++)
-                          : null,
+                    Row(
+                      children: <Widget>[
+                        IconButton(
+                          icon: const Icon(Icons.chevron_left),
+                          onPressed: currentPage > 0
+                              ? () => setState(() => currentPage--)
+                              : null,
+                        ),
+                        ...getDisplayedPages(
+                          currentPage,
+                          (filteredData.length / rowsPerPage).ceil(),
+                        ).map<Widget>((page) {
+                          if (page == null) {
+                            return const PageButton(
+                              pageNumber: '...',
+                              isSelected: false,
+                            );
+                          } else {
+                            final pageNumber = page;
+                            final isSelected = pageNumber == currentPage + 1;
+                            return PageButton(
+                              pageNumber: pageNumber.toString(),
+                              isSelected: isSelected,
+                              onTap: () {
+                                setState(() {
+                                  currentPage = pageNumber - 1;
+                                });
+                              },
+                            );
+                          }
+                        }),
+                        IconButton(
+                          icon: const Icon(Icons.chevron_right),
+                          onPressed:
+                              (currentPage + 1) * rowsPerPage <
+                                  filteredData.length
+                              ? () => setState(() => currentPage++)
+                              : null,
+                        ),
+                      ],
                     ),
                   ],
                 ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTable(BuildContext context, ColorScheme colorScheme) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final Widget dataTable = DataTable(
+          columnSpacing: 10,
+          dividerThickness: 0,
+          dataRowMaxHeight: widget.hasFlexibleRowHeight
+              ? double.infinity
+              : widget.rowHeight,
+          checkboxHorizontalMargin: 0,
+          border: TableBorder(
+            horizontalInside: BorderSide(
+              color: context.colors.onSurface.withValues(alpha: 0.1),
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          dataRowColor: WidgetStateProperty.all(colorScheme.surface),
+          headingRowColor: WidgetStateProperty.all(
+            context.colors.onSurface.withValues(alpha: 0.1),
+          ),
+          columns: <DataColumn>[
+            ...widget.columns.mapIndexed(
+              (index, column) => DataColumn(
+                label: Row(
+                  children: <Widget>[
+                    Text(
+                      column.columnName,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
+                    ),
+                    if (column.enableColumnSorting)
+                      Icon(
+                        sortColumnIndex == index
+                            ? (isAscending
+                                  ? Icons.arrow_upward
+                                  : Icons.arrow_downward)
+                            : Icons.unfold_more,
+                        size: 16,
+                        color: Colors.grey.shade600,
+                      ),
+                  ],
+                ),
+                onSort: column.enableColumnSorting
+                    ? (index, _) => sortByColumn(index)
+                    : null,
+              ),
+            ),
+          ],
+          rows: List<DataRow>.generate(paginatedData.length, (int index) {
+            final data = paginatedData[index];
+            return DataRow(
+              selected: widget.selected?.contains(index) ?? false,
+              onSelectChanged: widget.selectable
+                  ? (bool? value) {
+                      if (widget.onSelect != null) {
+                        widget.onSelect!(data);
+                      }
+                    }
+                  : null,
+              onLongPress: widget.onLongPress == null
+                  ? null
+                  : () => widget.onLongPress!(data),
+              color: WidgetStateProperty.all<Color?>(
+                hoveredRowIndex == index
+                    ? colorScheme.surface.withValues(alpha: 0.0)
+                    : colorScheme.surface.withValues(alpha: 0.3),
+              ),
+              cells: <DataCell>[
+                ...List<DataCell>.generate(widget.columns.length, (int i) {
+                  final column = widget.columns[i];
+                  return DataCell(
+                    onTap: widget.onTap == null
+                        ? null
+                        : () => widget.onTap!(data),
+                    MouseRegion(
+                      onEnter: (_) {
+                        setState(() {
+                          hoveredRowIndex = index;
+                        });
+                      },
+                      onExit: (_) {
+                        setState(() {
+                          hoveredRowIndex = null;
+                        });
+                      },
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: 500,
+                          minWidth: 80,
+                        ),
+                        child: column.onBuild == null
+                            ? Text(data.toString())
+                            : column.onBuild!(data),
+                      ),
+                    ),
+                  );
+                }),
               ],
+            );
+          }),
+        );
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              // color: context.colors.onSurface.withValues(alpha: 0.1),
             ),
           ),
-        ],
-      ),
+          clipBehavior: Clip.hardEdge,
+          child: Scrollbar(
+            controller: scrollController,
+            scrollbarOrientation: ScrollbarOrientation.bottom,
+            interactive: true,
+            trackVisibility: true,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(bottom: 16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: constraints.hasBoundedHeight
+                    ? SingleChildScrollView(
+                        controller: verticalScrollController,
+                        child: dataTable,
+                      )
+                    : dataTable,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -59,7 +59,7 @@ final class LineRemovalControllerProvider
 }
 
 String _$lineRemovalControllerHash() =>
-    r'b5e534b3358113ab9678a9dc9cadc281cde73a8f';
+    r'f8952022a42f0fefca12e788f84dfd0fe07249a2';
 
 final class LineRemovalControllerFamily extends $Family
     with

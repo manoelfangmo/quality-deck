@@ -26,8 +26,7 @@ class AppException implements Exception {
         'This appointment was removed. Refresh and try again.',
     'client_has_appointment':
         'This client already has an appointment. Edit or remove it first.',
-    'price_item_not_found':
-        'That price list item was deleted. Pick another.',
+    'price_item_not_found': 'That price list item was deleted. Pick another.',
     'project_not_found':
         "This project couldn't be found. Refresh and try again.",
     'project_already_archived': 'This project is already archived.',
@@ -35,13 +34,16 @@ class AppException implements Exception {
     'project_archived':
         'This project is archived. Unarchive it to make changes.',
     'job_not_found': 'This job was deleted. Refresh to see the latest.',
-    'line_item_not_found':
-        'This line was removed. Refresh to see the latest.',
+    'line_item_not_found': 'This line was removed. Refresh to see the latest.',
     'invalid_quantity': 'Enter a quantity greater than 0.',
     'field_locked':
         "That field comes from the price list and can't be changed here.",
     'reorder_mismatch': 'The list changed. Refresh and try again.',
     'invalid_overhead': 'Enter a percentage from 0 to 100.',
+    'photo_limit_reached':
+        'Limit of 10 reached. Delete a photo to add another.',
+    'photo_not_found':
+        'This photo was already removed. Refresh to see the latest.',
   };
 
   const AppException.clientNotFound()
@@ -88,6 +90,30 @@ class AppException implements Exception {
   const AppException.lineItemNotFound()
     : message = 'This line was removed. Refresh to see the latest.',
       token = 'line_item_not_found';
+
+  const AppException.invalidPhotoType()
+    : message = 'Only JPEG, PNG, HEIC or HEIF images can be added.',
+      token = 'invalid_photo_type';
+
+  const AppException.photoTooLarge()
+    : message = 'This photo is over 20 MB.',
+      token = 'photo_too_large';
+
+  const AppException.photoLimitReached()
+    : message = 'Limit of 10 reached. Delete a photo to add another.',
+      token = 'photo_limit_reached';
+
+  const AppException.photoNotFound()
+    : message = 'This photo was already removed. Refresh to see the latest.',
+      token = 'photo_not_found';
+
+  const AppException.cameraDenied()
+    : message = 'Camera access is off. Turn it on in Settings to take photos.',
+      token = 'camera_denied';
+
+  const AppException.uploadFailed()
+    : message = 'Upload failed',
+      token = 'upload_failed';
 
   factory AppException.fromToken(String token) {
     return AppException(_copy[token] ?? 'Something went wrong.', token: token);

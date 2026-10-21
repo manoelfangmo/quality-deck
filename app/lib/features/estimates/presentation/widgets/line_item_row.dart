@@ -17,6 +17,8 @@ class LineItemRow extends StatelessWidget {
   final int index;
   final VoidCallback onTap;
   final bool showHandle;
+  static const double radius = 12;
+  static const double gap = 4; // vertical space above and below each card
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +43,7 @@ class LineItemRow extends StatelessWidget {
     final name = Row(
       children: [
         Flexible(child: Text(item.name, style: nameStyle)),
-        if (item.isCustom) ...[
-          const SizedBox(width: 8),
-          const _CustomBadge(),
-        ],
+        if (item.isCustom) ...[const SizedBox(width: 8), const _CustomBadge()],
       ],
     );
 
@@ -69,7 +68,8 @@ class LineItemRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     name,
-                    if (description != null) Text(description, style: secondary),
+                    if (description != null)
+                      Text(description, style: secondary),
                   ],
                 ),
               ),
@@ -80,18 +80,30 @@ class LineItemRow extends StatelessWidget {
             ],
           );
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              handle,
-              Expanded(child: body),
-            ],
+    final scheme = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: gap),
+      child: Material(
+        color: scheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 10, 16, 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconTheme.merge(
+                  data: IconThemeData(color: scheme.onSurfaceVariant),
+                  child: handle,
+                ),
+                Expanded(child: body),
+              ],
+            ),
           ),
         ),
       ),
@@ -113,9 +125,8 @@ class _CustomBadge extends StatelessWidget {
       ),
       child: Text(
         'Custom',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: scheme.onSecondaryContainer,
-        ),
+        style: Theme.of(context).textTheme.labelSmall
+            ?.copyWith(color: scheme.onSecondaryContainer),
       ),
     );
   }
@@ -147,7 +158,8 @@ class _PriceLine extends StatelessWidget {
       );
     }
 
-    final quantity = '${item.quantity.format()} ${item.pricingType.quantityUnit}';
+    final quantity =
+        '${item.quantity.format()} ${item.pricingType.quantityUnit}';
     if (!item.hasOverride) {
       return Text('$quantity × ${item.effectivePrice.format()}', style: style);
     }
@@ -159,9 +171,7 @@ class _PriceLine extends StatelessWidget {
             text: item.savedPrice.format(),
             style: const TextStyle(decoration: TextDecoration.lineThrough),
           ),
-          TextSpan(
-            text: ' $quantity × ${item.effectivePrice.format()}',
-          ),
+          TextSpan(text: ' $quantity × ${item.effectivePrice.format()}'),
         ],
       ),
     );

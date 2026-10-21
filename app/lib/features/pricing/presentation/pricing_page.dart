@@ -81,12 +81,10 @@ class PricingPage extends ConsumerWidget {
                       onAdd: () => _openForm(context),
                     );
                   }
-                  return SingleChildScrollView(
-                    child: PaginatedTableComponent<PriceItem>(
-                      showSearchField: false,
-                      columns: _columns(context, ref, compact: compact),
-                      data: list,
-                    ),
+                  return PaginatedTableComponent<PriceItem>(
+                    showSearchField: false,
+                    columns: _columns(context, ref, compact: compact),
+                    data: list,
                   );
                 },
               ),

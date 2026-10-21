@@ -4,6 +4,7 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:app/core/database/buckets.dart';
 import 'package:app/core/domain/money.dart';
 import 'package:app/core/domain/quantity.dart';
 import 'package:app/features/clients/data/clients_repository.dart';
@@ -11,6 +12,10 @@ import 'package:app/features/estimates/data/jobs_repository.dart';
 import 'package:app/features/estimates/data/models.dart';
 import 'package:app/features/estimates/domain/job_type.dart';
 import 'package:app/features/estimates/domain/labor.dart';
+import 'package:app/features/onsite/application/job_photo_repository.dart';
+import 'package:app/features/onsite/data/supabase_job_photo_repository.dart';
+import 'package:app/features/onsite/data/supabase_photo_storage.dart';
+import 'package:app/features/onsite/domain/photo_kind.dart';
 import 'package:app/features/projects/data/projects_repository.dart';
 
 import 'clean_up.dart';
@@ -52,41 +57,44 @@ void main() {
   }
 
   group('JobsRepository.fetchForProject', () {
-    test('returns Quality Deck jobs with lines and hides other businesses', () async {
-      final jobs = await repository.fetchForProject(SeedProjects.anaOakId);
+    test(
+      'returns Quality Deck jobs with lines and hides other businesses',
+      () async {
+        final jobs = await repository.fetchForProject(SeedProjects.anaOakId);
 
-      expect(jobs, isNotEmpty);
-      expect(jobs.map((row) => row.job.id), contains(SeedJobs.backDeckId));
-      expect(jobs.first.job.id, SeedJobs.backDeckId);
-      expect(jobs.first.job.number, 1);
-      expect(jobs.first.job.title, 'Back deck');
-      expect(jobs.first.job.jobType, JobType.deck);
-      expect(jobs.first.job.labor?.hours, const Quantity(1250));
-      expect(jobs.first.job.labor?.rate, const Money(6500));
-      expect(jobs[1].job.id, SeedJobs.frontStepsId);
-      expect(jobs[1].job.number, 2);
-      expect(jobs[1].job.labor?.rate, const Money(7000));
-      expect(
-        jobs.first.lines.any((line) => line.id == SeedLineItems.compositeId),
-        isTrue,
-      );
-      expect(
-        jobs.first.lines.any(
+        expect(jobs, isNotEmpty);
+        expect(jobs.map((row) => row.job.id), contains(SeedJobs.backDeckId));
+        expect(jobs.first.job.id, SeedJobs.backDeckId);
+        expect(jobs.first.job.number, 1);
+        expect(jobs.first.job.title, 'Back deck');
+        expect(jobs.first.job.jobType, JobType.deck);
+        expect(jobs.first.job.labor?.hours, const Quantity(1250));
+        expect(jobs.first.job.labor?.rate, const Money(6500));
+        expect(jobs[1].job.id, SeedJobs.frontStepsId);
+        expect(jobs[1].job.number, 2);
+        expect(jobs[1].job.labor?.rate, const Money(7000));
+        expect(
+          jobs.first.lines.any((line) => line.id == SeedLineItems.compositeId),
+          isTrue,
+        );
+        expect(
+          jobs.first.lines.any(
+            (line) => line.id == SeedLineItems.deletedPriceItemLineId,
+          ),
+          isTrue,
+        );
+        final deleted = jobs.first.lines.firstWhere(
           (line) => line.id == SeedLineItems.deletedPriceItemLineId,
-        ),
-        isTrue,
-      );
-      final deleted = jobs.first.lines.firstWhere(
-        (line) => line.id == SeedLineItems.deletedPriceItemLineId,
-      );
-      expect(deleted.priceItemDeleted, isTrue);
-      expect(deleted.savedPrice, const Money(600));
+        );
+        expect(deleted.priceItemDeleted, isTrue);
+        expect(deleted.savedPrice, const Money(600));
 
-      final other = await repository.fetchForProject(
-        SeedProjects.otherCoProjectId,
-      );
-      expect(other, isEmpty);
-    });
+        final other = await repository.fetchForProject(
+          SeedProjects.otherCoProjectId,
+        );
+        expect(other, isEmpty);
+      },
+    );
 
     test('returns an empty list when the project has no jobs', () async {
       final projectId = await arrangeProject();
@@ -96,41 +104,44 @@ void main() {
   });
 
   group('JobsRepository.create', () {
-    test('inserts a job that the next fetch returns, numbered in add order', () async {
-      final projectId = await arrangeProject();
-      final stamp = uniqueStamp();
+    test(
+      'inserts a job that the next fetch returns, numbered in add order',
+      () async {
+        final projectId = await arrangeProject();
+        final stamp = uniqueStamp();
 
-      final created = await repository.create(
-        CreateJobCommand(
-          projectId: projectId,
-          title: '  CT Stair rebuild $stamp  ',
-          jobType: JobType.deck,
-          description: 'Rebuild the stairs',
-        ),
-      );
+        final created = await repository.create(
+          CreateJobCommand(
+            projectId: projectId,
+            title: '  CT Stair rebuild $stamp  ',
+            jobType: JobType.deck,
+            description: 'Rebuild the stairs',
+          ),
+        );
 
-      expect(created.id, isUuid);
-      expect(created.title, 'CT Stair rebuild $stamp');
-      expect(created.jobType, JobType.deck);
-      expect(created.description, 'Rebuild the stairs');
-      expect(created.labor, isNull);
+        expect(created.id, isUuid);
+        expect(created.title, 'CT Stair rebuild $stamp');
+        expect(created.jobType, JobType.deck);
+        expect(created.description, 'Rebuild the stairs');
+        expect(created.labor, isNull);
 
-      await repository.create(
-        CreateJobCommand(
-          projectId: projectId,
-          title: 'CT Patio $stamp',
-          jobType: JobType.patio,
-        ),
-      );
+        await repository.create(
+          CreateJobCommand(
+            projectId: projectId,
+            title: 'CT Patio $stamp',
+            jobType: JobType.patio,
+          ),
+        );
 
-      final fetched = await repository.fetchForProject(projectId);
-      expect(fetched, hasLength(2));
-      expect(fetched[0].job.number, 1);
-      expect(fetched[0].job.title, 'CT Stair rebuild $stamp');
-      expect(fetched[1].job.number, 2);
-      expect(fetched[1].job.jobType, JobType.patio);
-      expect(fetched[1].lines, isEmpty);
-    });
+        final fetched = await repository.fetchForProject(projectId);
+        expect(fetched, hasLength(2));
+        expect(fetched[0].job.number, 1);
+        expect(fetched[0].job.title, 'CT Stair rebuild $stamp');
+        expect(fetched[1].job.number, 2);
+        expect(fetched[1].job.jobType, JobType.patio);
+        expect(fetched[1].lines, isEmpty);
+      },
+    );
   });
 
   group('JobsRepository.update', () {
@@ -186,6 +197,37 @@ void main() {
       expect(fetched, hasLength(1));
       expect(fetched.single.job.number, 1);
       expect(fetched.single.job.title, startsWith('CT second'));
+    });
+
+    test('deleting a job removes its photos', () async {
+      final projectId = await arrangeProject();
+      final job = await repository.create(
+        CreateJobCommand(
+          projectId: projectId,
+          title: 'CT photos cascade ${uniqueStamp()}',
+          jobType: JobType.deck,
+        ),
+      );
+      final photos = SupabaseJobPhotoRepository(supabase!);
+      final storage = SupabasePhotoStorage(supabase!);
+      final id = uniqueUuid();
+      final path = '${SeedUsers.qualityDeckId}/${job.id}/$id.jpg';
+      await storage.upload(path, jpeg1x1);
+      cleanup.trackStorageObject(bucket: Buckets.jobPhotos, path: path);
+      await photos.insert(
+        JobPhotoInsert(
+          id: id,
+          jobId: job.id,
+          kind: PhotoKind.after,
+          storagePath: path,
+          width: 1,
+          height: 1,
+        ),
+      );
+
+      await repository.delete(job.id);
+
+      expect(await photos.listByJob(job.id), isEmpty);
     });
   });
 
