@@ -243,6 +243,7 @@ class _PaginatedTableComponentState<T extends Object>
                   child: SingleChildScrollView(
                     controller: scrollController,
                     scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.only(bottom: 16),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         minWidth: constraints.maxWidth,
