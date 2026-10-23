@@ -90,19 +90,16 @@ void main() {
     expect(find.byType(PopupMenuButton<String>), findsOneWidget);
   });
 
-  testWidgets('Generate proposal is disabled with a Coming soon tooltip', (
-    tester,
-  ) async {
+  testWidgets('Export PDF is enabled', (tester) async {
     when(projects.fetchOne(melgarOak.id)).thenAnswer((_) async => melgarOak);
 
     await pumpPage(tester, melgarOak.id);
 
-    expect(find.text('Generate proposal'), findsOneWidget);
+    expect(find.text('Export PDF'), findsOneWidget);
     final button = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Generate proposal'),
+      find.widgetWithText(FilledButton, 'Export PDF'),
     );
-    expect(button.onPressed, isNull);
-    expect(find.byTooltip('Coming soon'), findsOneWidget);
+    expect(button.onPressed, isNotNull);
   });
 
   testWidgets('unknown id shows not-found', (tester) async {

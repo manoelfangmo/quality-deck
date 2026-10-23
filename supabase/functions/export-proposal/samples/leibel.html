@@ -1,0 +1,311 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>Quality Deck Proposal</title><style>
+@page { size: Letter; margin: 0; }
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  color: #111;
+  background: #fff;
+  font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.35;
+  orphans: 3;
+  widows: 3;
+}
+p, h1, h2, h3, li, td, th, address {
+  overflow-wrap: anywhere;
+}
+.page {
+  min-height: 10.6in;
+}
+.letterhead {
+  background: #0b1a28;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 36px 14px;
+  gap: 24px;
+}
+.letterhead-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.logo {
+  width: 92px;
+  height: 92px;
+  flex: 0 0 92px;
+}
+.logo img, .logo svg {
+  width: 92px;
+  height: 92px;
+  display: block;
+  object-fit: contain;
+}
+.contact {
+  text-align: right;
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-weight: 500;
+  font-size: 9.5pt;
+  letter-spacing: 0.12em;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #f4f6f8;
+}
+.gold-rule {
+  height: 5px;
+  background: #c4a24a;
+}
+.tagline {
+  background: #fff;
+  color: #c4a24a;
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  font-size: 11pt;
+  text-transform: uppercase;
+  padding: 10px 36px 0;
+}
+.body {
+  display: flex;
+  align-items: stretch;
+  padding: 12px 0 24px;
+  min-height: 8.6in;
+}
+.main {
+  flex: 1 1 auto;
+  padding: 0 28px 0 36px;
+  min-width: 0;
+}
+.sidebar {
+  flex: 0 0 2.35in;
+  background: #c4a24a;
+  color: #0b1a28;
+  padding: 16px 14px 20px;
+}
+.meta {
+  margin: 8px 0 16px;
+}
+.meta-row {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 8px;
+  margin: 0 0 4px;
+  break-inside: avoid;
+}
+.meta-label {
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: 9pt;
+  color: #0b1a28;
+  text-transform: uppercase;
+}
+.meta-value {
+  font-weight: 600;
+}
+.line-items {
+  width: 100%;
+  border-collapse: collapse;
+}
+.line-items thead {
+  display: table-header-group;
+}
+.line-items th {
+  background: #0b1a28;
+  color: #fff;
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-weight: 500;
+  font-size: 8.5pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 8px 10px;
+}
+.line-items th.price, .line-items td.price {
+  text-align: right;
+  width: 1.35in;
+  white-space: nowrap;
+}
+.line-items th.line-no, .line-items td.line-no {
+  width: 0.85in;
+  vertical-align: top;
+}
+.line-items td {
+  vertical-align: top;
+  padding: 12px 10px 14px;
+  border-bottom: 1px solid #d7d7d7;
+}
+.line-items tr.job-row {
+  break-inside: avoid;
+}
+.line-items tr.job-row td {
+  padding-top: 16px;
+}
+.job-heading {
+  break-after: avoid;
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  font-size: 11.5pt;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0b1a28;
+  margin: 0 0 6px;
+}
+.job-type {
+  font-size: 8.5pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #666;
+  margin: 0 0 8px;
+}
+.scope {
+  white-space: pre-wrap;
+  margin: 0 0 8px;
+}
+.scope-list, .line-list {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
+.scope-list li, .line-list li {
+  margin: 0 0 4px;
+  break-inside: avoid;
+}
+.line-name {
+  font-weight: 700;
+}
+.line-qty {
+  color: #444;
+  font-size: 9.5pt;
+}
+.exclusions {
+  margin: 8px 0 0;
+  font-size: 9.5pt;
+}
+.price-value {
+  color: #c4a24a;
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  font-size: 16pt;
+  letter-spacing: 0.02em;
+}
+.option-price {
+  display: block;
+  margin-top: 8px;
+  color: #c4a24a;
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  font-size: 10.5pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.totals {
+  break-inside: avoid;
+  margin: 18px 0 8px;
+  padding-top: 8px;
+}
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 10px;
+}
+.totals-row.grand {
+  background: #0b1a28;
+  color: #fff;
+  padding: 10px;
+  margin-top: 6px;
+}
+.totals-row.grand .price-value {
+  color: #c4a24a;
+}
+.totals-label {
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sidebar h2 {
+  break-after: avoid;
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  font-size: 10pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+  color: #0b1a28;
+}
+.sidebar-card {
+  margin: 0 0 16px;
+  break-inside: avoid;
+}
+.sidebar-card p {
+  margin: 0;
+  font-size: 8.5pt;
+  line-height: 1.4;
+}
+.concept {
+  break-inside: avoid;
+  margin: 8px 0 0;
+}
+.concept img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 160px;
+  object-fit: cover;
+  background: #0b1a28;
+}
+.concept figcaption {
+  font-size: 7.5pt;
+  margin-top: 4px;
+  font-style: italic;
+}
+.closing {
+  padding: 8px 36px 28px;
+}
+.thank-you {
+  text-align: right;
+  margin: 8px 0 18px;
+}
+.thank-you .script {
+  font-family: 'Great Vibes', cursive;
+  font-size: 34pt;
+  color: #0b1a28;
+  line-height: 1;
+}
+.thank-you .rest {
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 11pt;
+  color: #0b1a28;
+  margin-top: 4px;
+}
+.sign-row {
+  display: flex;
+  gap: 32px;
+  align-items: flex-end;
+  font-size: 10pt;
+}
+.sign-by {
+  flex: 1 1 auto;
+}
+.sign-line {
+  flex: 1 1 2.4in;
+}
+.sign-rule {
+  border-bottom: 1px solid #111;
+  height: 18px;
+  margin-top: 2px;
+}
+.extra-terms {
+  padding: 0 36px 24px;
+  font-size: 9.5pt;
+  white-space: pre-wrap;
+}
+</style></head><body><div class="page"><header class="letterhead"><div class="letterhead-left"><div class="logo"><svg viewBox="0 0 120 120" role="img" aria-label="Quality Deck"><circle cx="60" cy="60" r="58" fill="#0b1a28" stroke="#c4a24a" stroke-width="3"></circle><path d="M38 38c0-8 8-14 22-14 18 0 28 10 28 26 0 14-8 24-22 28l16 16h-16l-14-14c-2 0-4 0-6-.5C40 77 38 68 38 58V38z" fill="none" stroke="#f4f6f8" stroke-width="7" stroke-linejoin="round"></path><path d="M58 36c10 0 18 6 18 16 0 9-6 15-16 18" fill="none" stroke="#c4a24a" stroke-width="6" stroke-linecap="round"></path><path d="M78 86l16 2-10 12-6-14z" fill="#c4a24a"></path></svg></div></div><div class="contact"><div>11510 LAUREL WALK DR</div><div>LAUREL, MD 20708</div><div>MHIC LICENSE # 153656</div><div>301-886-9355</div><div>INFO@QUALITY-DECK.COM</div><div>WWW.QUALITY-DECK.COM</div></div></header><div class="gold-rule"></div><div class="tagline">DECKS | PORCHES | OUTDOOR LIVING</div><div class="body"><div class="main"><section class="meta"><div class="meta-row"><div class="meta-label">Project:</div><div class="meta-value">Deck Restoration</div></div><div class="meta-row"><div class="meta-label">Location:</div><div class="meta-value">1301 Windham Ln, Silver Spring, MD 20902</div></div><div class="meta-row"><div class="meta-label">Date:</div><div class="meta-value">October 15, 2026</div></div><div class="meta-row"><div class="meta-label">Attention:</div><div class="meta-value">Leibel</div></div><div class="meta-row"><div class="meta-label">Proposal:</div><div class="meta-value">QD-2026-0001</div></div><div class="meta-row"><div class="meta-label">Valid until:</div><div class="meta-value">November 14, 2026</div></div></section><table class="line-items"><thead><tr><th class="line-no">Line Item</th><th>Description</th><th class="price">Price</th></tr></thead><tbody><tr class="job-row"><td class="line-no">001</td><td><h2 class="job-heading">Deck Repainting / Rotten Wood Replacement</h2><div class="job-type">deck</div><p class="scope">Deck Restoration &amp; Recoating – 278 Sq. Ft.
+Protection of surrounding areas, railing repairs, surface preparation, crack preparation, two coats of SuperDeck, and final cleanup.</p><ul class="line-list"><li><span class="line-name">Decking recoat</span> — <span class="line-qty">278 sq ft × $8.00</span> — $2,224.00</li><li><span class="line-name">Railing repairs</span> — <span class="line-qty">Fixed</span> — $7.00</li><li><span class="line-name">Surface prep</span> — <span class="line-qty">278 sq ft × $2.00</span> — $556.00</li><li><span class="line-name">Protective coating</span> — <span class="line-qty">278 sq ft × $5.00</span> — $1,390.00</li><li><span class="line-name">Cleanup</span> — <span class="line-qty">Fixed</span> — $2.00</li></ul><p class="exclusions"><strong>Exclusions: </strong>Existing structural beams and support posts are excluded from this scope of work.</p></td><td class="price"><span class="price-value">$4,179.00</span></td></tr><tr class="job-row"><td class="line-no">002</td><td><h2 class="job-heading">Stair refinish</h2><div class="job-type">deck</div><p class="scope">Sand and recoat stair treads and risers.</p><ul class="line-list"><li><span class="line-name">Stair coating</span> — <span class="line-qty">40 sq ft × $9.00</span> — $360.00</li><li><span class="line-name">Custom trim</span> — <span class="line-qty">12 linear ft × $15.00</span> — $180.00</li><li><span class="line-name">Fasteners</span> — <span class="line-qty">Fixed</span> — $180.00</li><li><span class="line-name">Landing recoat</span> — <span class="line-qty">24 sq ft × $8.50</span> — $204.00</li><li><span class="line-name">Railing stain</span> — <span class="line-qty">30 linear ft × $4.00</span> — $120.00</li></ul><p class="option-price">Labor $300.00</p></td><td class="price"><span class="price-value">$1,344.00</span></td></tr></tbody></table><section class="totals"><div class="totals-row"><span>001 Deck Repainting / Rotten Wood Replacement</span><span>$4,179.00</span></div><div class="totals-row"><span>002 Stair refinish</span><span>$1,344.00</span></div><div class="totals-row grand"><span class="totals-label">Total Labor &amp; Materials</span><span class="price-value">$5,523.00</span></div></section></div><aside class="sidebar"><div class="sidebar-card"><h2>Code &amp; Material Compliance</h2><p>All work will be completed in accordance with applicable local building codes and requirements. All hardware, fasteners, structural connections, and materials will be new and code-approved for the intended application, installed per code and manufacturer specifications.</p></div><div class="sidebar-card"><h2>Pricing Validity</h2><p>Pricing valid for 30 days from proposal date.</p></div><div class="sidebar-card"><h2>Field Verification</h2><p>Final dimensions and details will be confirmed in the field.</p></div><div class="sidebar-card"><h2>Project Timeframe</h2><p>Estimated project timeframe:</p><p>1-2 Days</p><p>1-2 Days</p><p>weather depending*.</p></div><div class="sidebar-card"><h2>Scope Changes</h2><p>Any changes to the scope may affect pricing.</p></div><div class="sidebar-card"><h2>Payment Schedule</h2><p>1/3 deposit • 2/3 at project start • 3/3 upon completion</p></div><div class="sidebar-card"><h2>Conceptual Renderings</h2><p>Conceptual renderings are for illustration purposes only.</p><figure class="concept"><img src="https://img.example/biz/job-1/one.jpg" alt width="1200" height="800"/><figcaption>Conceptual rendering – not to scale</figcaption></figure><figure class="concept"><img src="https://img.example/biz/job-1/two.jpg" alt width="1200" height="800"/><figcaption>Conceptual rendering – not to scale</figcaption></figure><figure class="concept"><img src="https://img.example/biz/job-2/three.jpg" alt width="800" height="1000"/><figcaption>Conceptual rendering – not to scale</figcaption></figure><figure class="concept"><img src="https://img.example/biz/job-2/four.jpg" alt width="800" height="1000"/><figcaption>Conceptual rendering – not to scale</figcaption></figure></div></aside></div><footer class="closing"><div class="thank-you"><div class="script">Thank You</div><div class="rest">For considering</div><div class="rest">Quality Deck</div></div><div class="sign-row"><div class="sign-by">Proposal by: Moises Melgar, Quality Deck</div><div class="sign-line">Client Signature:<div class="sign-rule"></div></div><div class="sign-line">Date:<div class="sign-rule"></div></div></div></footer></div></body></html>

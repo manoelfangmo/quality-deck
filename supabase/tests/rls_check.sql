@@ -1388,6 +1388,44 @@ begin
     select 1 from public.job_photos where job_id = v_id
   ), 'deleting a job should delete its photos';
 
+  -- proposal_exports: members can read their business's rows only.
+  perform set_config('role', 'postgres', true);
+  insert into public.proposal_exports (
+    business_id, project_id, version, proposal_number, storage_path,
+    total_cents, created_by
+  ) values (
+    qd_id,
+    qd_project_id,
+    1,
+    'QD-2026-0001',
+    '00000000-0000-4000-8000-000000000011/' || qd_project_id || '/v1-rls.pdf',
+    1000,
+    owner_id
+  );
+
+  perform public._test_as_user(owner_id);
+  assert (
+    select count(*) from public.proposal_exports
+  ) = 1, 'owner should see their proposal export';
+
+  perform public._test_as_user(other_id);
+  assert (
+    select count(*) from public.proposal_exports
+  ) = 0, 'other business should see 0 proposal_exports';
+
+  begin
+    perform public.next_proposal_export(qd_project_id);
+    assert false, 'authenticated should not call next_proposal_export';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  perform set_config('role', 'postgres', true);
+  select pe.version into v_count
+  from public.next_proposal_export(qd_project_id) as pe;
+  assert v_count = 2, 'next export version should be 2 after an existing row';
+
   -- anon sees zero rows / has no access.
   perform set_config('role', 'anon', true);
   begin
@@ -1497,6 +1535,14 @@ begin
   begin
     select count(*) into v_count from public.job_photos;
     assert v_count = 0, 'anon should see 0 job_photos if select is granted';
+  exception
+    when insufficient_privilege then null;
+    when sqlstate '42501' then null;
+  end;
+
+  begin
+    select count(*) into v_count from public.proposal_exports;
+    assert v_count = 0, 'anon should see 0 proposal_exports if select is granted';
   exception
     when insufficient_privilege then null;
     when sqlstate '42501' then null;

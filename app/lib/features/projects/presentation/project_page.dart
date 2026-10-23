@@ -15,6 +15,7 @@ import 'package:app/features/projects/presentation/controllers/project_actions.d
 import 'package:app/features/projects/presentation/widgets/project_app_bar_actions.dart';
 import 'package:app/features/projects/presentation/widgets/project_client_cell.dart';
 import 'package:app/features/projects/presentation/widgets/project_total_card.dart';
+import 'package:app/features/proposals/presentation/widgets/export_history.dart';
 
 class ProjectPage extends ConsumerWidget {
   const ProjectPage({required this.projectId, super.key});
@@ -121,6 +122,8 @@ class _ProjectBody extends ConsumerWidget {
             JobsSection(projectId: row.id, readOnly: archived),
             const SizedBox(height: 16),
             ProjectTotalCard(row: row, readOnly: archived),
+            const SizedBox(height: 16),
+            ExportHistory(projectId: row.id),
           ],
         ),
       ),

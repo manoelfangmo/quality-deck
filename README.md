@@ -14,6 +14,19 @@ flutter run -d chrome --dart-define-from-file development.env --web-port=3000
 
 `app/development.env` holds the local API URL and anon key from `supabase status`.
 
+Proposal PDF export (`export-proposal`) needs a PDFShift key. Put it in `supabase/.env` (that file is gitignored):
+
+```
+PDFSHIFT_API_KEY=sk_...
+PDFSHIFT_SANDBOX=true
+```
+
+Local and staging should keep `PDFSHIFT_SANDBOX=true` so test exports do not use paid credits. Then serve the function next to the stack:
+
+```sh
+supabase functions serve export-proposal --env-file supabase/.env
+```
+
 ## Sign in
 
 Default user (Quality Deck owner):

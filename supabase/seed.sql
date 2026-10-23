@@ -171,17 +171,41 @@ where id in (
   '00000000-0000-4000-8000-000000000005'
 );
 
-insert into public.businesses (id, name, owner_id)
+insert into public.businesses (
+  id, name, owner_id,
+  street, city, state, zip, phone, email, website,
+  license_number, tagline, proposal_prefix
+)
 values
   (
     '00000000-0000-4000-8000-000000000011',
     'Quality Deck',
-    '00000000-0000-4000-8000-000000000001'
+    '00000000-0000-4000-8000-000000000001',
+    '11510 Laurel Walk Dr',
+    'Laurel',
+    'MD',
+    '20708',
+    '301-886-9355',
+    'info@quality-deck.com',
+    'www.quality-deck.com',
+    'MHIC LICENSE # 153656',
+    'DECKS | PORCHES | OUTDOOR LIVING',
+    'QD'
   ),
   (
     '00000000-0000-4000-8000-000000000012',
     'Other Co',
-    '00000000-0000-4000-8000-000000000003'
+    '00000000-0000-4000-8000-000000000003',
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    'OC'
   );
 
 insert into public.memberships (user_id, business_id, role)
