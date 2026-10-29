@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:app/core/database/buckets.dart';
+import 'package:app/core/domain/app_exception.dart';
 import 'package:app/core/domain/money.dart';
 import 'package:app/core/domain/quantity.dart';
 import 'package:app/features/clients/data/clients_repository.dart';
@@ -170,6 +171,39 @@ void main() {
       expect(fetched.job.title, 'CT after $stamp');
       expect(fetched.job.jobType, JobType.hardscaping);
       expect(fetched.job.description, 'After');
+    });
+  });
+
+  group('JobsRepository.alternateOfJobId', () {
+    test('stores an alternate of another job on the same project', () async {
+      final projectId = await arrangeProject();
+      final stamp = uniqueStamp();
+      final base = await repository.create(
+        CreateJobCommand(
+          projectId: projectId,
+          title: 'CT base $stamp',
+          jobType: JobType.deck,
+        ),
+      );
+      final option = await repository.create(
+        CreateJobCommand(
+          projectId: projectId,
+          title: 'CT option $stamp',
+          jobType: JobType.deck,
+          alternateOfJobId: base.id,
+        ),
+      );
+
+      expect(option.alternateOfJobId, base.id);
+      final fetched = await repository.fetchForProject(projectId);
+      expect(fetched[1].job.alternateOfJobId, base.id);
+
+      try {
+        await repository.delete(base.id);
+        fail('expected AppException');
+      } on AppException catch (error) {
+        expect(error.token, 'job_has_alternates');
+      }
     });
   });
 

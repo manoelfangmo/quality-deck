@@ -14,7 +14,10 @@ import {
   PdfShiftFailedError,
 } from "./pdfshift.ts";
 import { savePdfAndRecord } from "./persist.ts";
-import { pdfshiftFooterHtml, renderProposalHtml } from "./template.tsx";
+import {
+  renderProposalHeaderHtml,
+  renderProposalHtml,
+} from "./template.tsx";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -162,7 +165,7 @@ Deno.serve(async (req) => {
     });
 
     const renderStarted = performance.now();
-    const html = renderProposalHtml(view);
+    const html = renderProposalHtml(view, { includeLetterhead: false });
     renderMs = Math.round(performance.now() - renderStarted);
 
     const apiKey = env("PDFSHIFT_API_KEY");
@@ -171,10 +174,7 @@ Deno.serve(async (req) => {
       html,
       apiKey,
       sandbox: sandboxMode(),
-      footerHtml: pdfshiftFooterHtml(
-        project.business.name,
-        project.business.phone,
-      ),
+      headerHtml: renderProposalHeaderHtml(view),
     });
     pdfMs = Math.round(performance.now() - pdfStarted);
     pdfshiftStatus = converted.status;

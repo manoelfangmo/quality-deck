@@ -44,6 +44,9 @@ class AppException implements Exception {
         'Limit of 10 reached. Delete a photo to add another.',
     'photo_not_found':
         'This photo was already removed. Refresh to see the latest.',
+    'invalid_alternate_job':
+        "Pick a job this option replaces. It can't be another option.",
+    'job_has_alternates': 'Remove the alternate options for this job first.',
   };
 
   const AppException.clientNotFound()

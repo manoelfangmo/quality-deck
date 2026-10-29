@@ -14,12 +14,15 @@ abstract class JobFormState with _$JobFormState {
     @Default('') String title,
     JobType? jobType,
     @Default('') String description,
+    @Default(false) bool isAlternate,
+    String? alternateOfJobId,
     @Default(false) bool isSubmitting,
     @Default(false) bool submitted,
     String? errorMessage,
     String? titleError,
     String? jobTypeError,
     String? descriptionError,
+    String? alternateOfJobIdError,
   }) = _JobFormState;
 
   factory JobFormState.fromJob(Job job) {
@@ -28,6 +31,8 @@ abstract class JobFormState with _$JobFormState {
       title: job.title,
       jobType: job.jobType,
       description: job.description ?? '',
+      isAlternate: job.isAlternate,
+      alternateOfJobId: job.alternateOfJobId,
     );
   }
 

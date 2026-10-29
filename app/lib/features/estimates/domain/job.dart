@@ -20,6 +20,7 @@ abstract class Job with _$Job {
     required JobType jobType,
     String? description,
     Labor? labor,
+    String? alternateOfJobId,
     required DateTime createdAt,
     @Default(0) int number,
   }) = _Job;
@@ -32,6 +33,7 @@ abstract class Job with _$Job {
       jobType: JobType.fromDb(json[JobsTable.jobType] as String),
       description: json[JobsTable.description] as String?,
       labor: _labor(json),
+      alternateOfJobId: json[JobsTable.alternateOfJobId] as String?,
       createdAt: const UtcToLocalConverter().fromJson(
         json[JobsTable.createdAt] as String,
       ),
@@ -39,6 +41,8 @@ abstract class Job with _$Job {
   }
 
   String get numberedTitle => '$number. $title';
+
+  bool get isAlternate => alternateOfJobId != null;
 }
 
 Labor? _labor(Map<String, dynamic> json) {

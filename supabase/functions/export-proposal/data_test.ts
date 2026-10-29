@@ -7,11 +7,13 @@ import {
   lineTotalCents,
   overheadAmountCents,
   proposalFileName,
+  proposalPackages,
   proposalTotals,
   slug,
 } from "./data.ts";
 import {
   emptyRequiredProject,
+  optionProject,
   specialCharsProject,
   typicalProject,
 } from "./fixtures.ts";
@@ -75,10 +77,19 @@ Deno.test("file names are stable slugs with a version", () => {
   assertEquals(slug('Smith & Sons <LLC> "HQ"'), "Smith-Sons-LLC-HQ");
 });
 
-Deno.test("money formatting is US dollars to the cent", () => {
-  assertEquals(formatUsd(1245000), "$12,450.00");
-  assertEquals(formatUsd(330000), "$3,300.00");
-  assertEquals(formatUsd(0), "$0.00");
+Deno.test("money formatting drops .00 on whole dollars", () => {
+  assertEquals(formatUsd(1245000), "$12,450");
+  assertEquals(formatUsd(330000), "$3,300");
+  assertEquals(formatUsd(0), "$0");
+  assertEquals(formatUsd(330050), "$3,300.50");
+});
+
+Deno.test("alternate jobs produce one package per option, not a combined total", () => {
+  const packages = proposalPackages(optionProject);
+  assertEquals(packages.length, 2);
+  assertEquals(packages[0].totalCents, 1724800);
+  assertEquals(packages[1].totalCents, 2938200);
+  assertEquals(proposalTotals(optionProject).totalCents, 1724800);
 });
 
 Deno.test("special-character project still has a client name", () => {

@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 
 import { render } from "preact-render-to-string";
-import { DOCUMENT_CSS } from "./css.ts";
+import { DOCUMENT_CSS, HEADER_CSS, PDF_PAGE_CSS } from "./css.ts";
 import { formatAddress, formatUsd } from "./data.ts";
 import type {
   ConceptImageView,
@@ -11,25 +11,10 @@ import type {
   ProposalView,
 } from "./types.ts";
 
-function QdMark() {
+function Icon({ d, viewBox = "0 0 24 24" }: { d: string; viewBox?: string }) {
   return (
-    <svg viewBox="0 0 120 120" role="img" aria-label="Quality Deck">
-      <circle cx="60" cy="60" r="58" fill="#0b1a28" stroke="#c4a24a" stroke-width="3" />
-      <path
-        d="M38 38c0-8 8-14 22-14 18 0 28 10 28 26 0 14-8 24-22 28l16 16h-16l-14-14c-2 0-4 0-6-.5C40 77 38 68 38 58V38z"
-        fill="none"
-        stroke="#f4f6f8"
-        stroke-width="7"
-        stroke-linejoin="round"
-      />
-      <path
-        d="M58 36c10 0 18 6 18 16 0 9-6 15-16 18"
-        fill="none"
-        stroke="#c4a24a"
-        stroke-width="6"
-        stroke-linecap="round"
-      />
-      <path d="M78 86l16 2-10 12-6-14z" fill="#c4a24a" />
+    <svg class="icon" viewBox={viewBox} aria-hidden="true">
+      <path fill="currentColor" d={d} />
     </svg>
   );
 }
@@ -50,16 +35,32 @@ export function Letterhead({ letterhead }: { letterhead: LetterheadView }) {
 
   return (
     <header class="letterhead">
-      <div class="letterhead-left">
-        <div class="logo">
-          {letterhead.logoUrl ? <img src={letterhead.logoUrl} alt="" /> : <QdMark />}
-        </div>
+      <div class="brand">
+        {letterhead.logoUrl ? (
+          <div class="logo">
+            <img src={letterhead.logoUrl} alt="" />
+          </div>
+        ) : (
+          <>
+            <div class="qd-mark">QD</div>
+            <div class="brand-text">
+              <div class="brand-name">{letterhead.name}</div>
+              <div class="brand-sub">Design & Construction</div>
+            </div>
+          </>
+        )}
       </div>
       {lines.length > 0 && (
         <div class="contact">
           {lines.map((line) => <div key={line}>{line}</div>)}
         </div>
       )}
+      <div class="tag-block">
+        <div class="slogan">
+          Built right.<br />Built to last.
+        </div>
+        {letterhead.tagline && <div class="tagline">{letterhead.tagline}</div>}
+      </div>
     </header>
   );
 }
@@ -69,85 +70,118 @@ export function ClientBlock({
   siteAddress,
   issueDate,
   attention,
-  proposalNumber,
-  validUntil,
 }: {
   projectTitle: string;
   siteAddress: ProposalView["siteAddress"];
   issueDate: string;
   attention: string;
-  proposalNumber: string;
-  validUntil: string;
 }) {
   return (
     <section class="meta">
-      <div class="meta-row">
-        <div class="meta-label">Project:</div>
-        <div class="meta-value">{projectTitle}</div>
+      <div class="meta-col">
+        <div class="meta-row">
+          <div class="meta-label">Project:</div>
+          <div class="meta-value">{projectTitle}</div>
+        </div>
+        <div class="meta-row">
+          <div class="meta-label">Location:</div>
+          <div class="meta-value">{formatAddress(siteAddress)}</div>
+        </div>
       </div>
-      <div class="meta-row">
-        <div class="meta-label">Location:</div>
-        <div class="meta-value">{formatAddress(siteAddress)}</div>
-      </div>
-      <div class="meta-row">
-        <div class="meta-label">Date:</div>
-        <div class="meta-value">{issueDate}</div>
-      </div>
-      <div class="meta-row">
-        <div class="meta-label">Attention:</div>
-        <div class="meta-value">{attention}</div>
-      </div>
-      <div class="meta-row">
-        <div class="meta-label">Proposal:</div>
-        <div class="meta-value">{proposalNumber}</div>
-      </div>
-      <div class="meta-row">
-        <div class="meta-label">Valid until:</div>
-        <div class="meta-value">{validUntil}</div>
+      <div class="meta-col">
+        <div class="meta-row">
+          <div class="meta-label">Date:</div>
+          <div class="meta-value">{issueDate}</div>
+        </div>
+        <div class="meta-row">
+          <div class="meta-label">Attention:</div>
+          <div class="meta-value">{attention}</div>
+        </div>
       </div>
     </section>
   );
 }
 
-export function LineItemTable({ items }: { items: LineItemView[] }) {
-  if (items.length === 0) return null;
+export function ScopeList({
+  items,
+  exclusions,
+}: {
+  items: LineItemView[];
+  exclusions: string | null;
+}) {
+  if (items.length === 0 && !exclusions) return null;
   return (
-    <ul class="line-list">
+    <ul class="scope-list">
       {items.map((item) => (
         <li key={`${item.name}-${item.totalCents}`}>
           <span class="line-name">{item.name}</span>
-          {" — "}
-          <span class="line-qty">{item.quantityLabel}</span>
-          {" — "}
-          {formatUsd(item.totalCents)}
           {item.description ? ` — ${item.description}` : ""}
         </li>
       ))}
+      {exclusions && (
+        <li>
+          <span class="line-name">Exclusions: </span>
+          {exclusions}
+        </li>
+      )}
     </ul>
   );
 }
 
-export function JobSection({ job }: { job: JobView }) {
+function shortKicker(description: string | null): string | null {
+  if (description == null) return null;
+  const trimmed = description.trim();
+  if (trimmed.length === 0 || trimmed.includes("\n") || trimmed.length > 40) {
+    return null;
+  }
+  if (/[.!?]/.test(trimmed)) return null;
+  return trimmed;
+}
+
+function PriceBox({ label, cents }: { label: string; cents: number }) {
+  return (
+    <div class="price-box">
+      <div class="price-label">{label}</div>
+      <div class="price-value">{formatUsd(cents)}</div>
+    </div>
+  );
+}
+
+export function JobSection({
+  job,
+  priceLabel,
+}: {
+  job: JobView;
+  priceLabel: string;
+}) {
+  const kicker = shortKicker(job.description);
+  const intro = kicker ? null : job.description;
   return (
     <tr class="job-row">
-      <td class="line-no">{job.numberLabel}</td>
+      <td class="line-no">
+        <div class="line-no-label">{job.numberLabel}</div>
+      </td>
       <td>
-        <h2 class="job-heading">{job.title}</h2>
-        {job.jobType && <div class="job-type">{job.jobType}</div>}
-        {job.description && <p class="scope">{job.description}</p>}
-        <LineItemTable items={job.lineItems} />
-        {job.laborCents != null && (
-          <p class="option-price">Labor {formatUsd(job.laborCents)}</p>
-        )}
-        {job.exclusions && (
-          <p class="exclusions">
-            <strong>Exclusions: </strong>
-            {job.exclusions}
-          </p>
-        )}
+        <div class="job-title-bar">
+          <h2 class="job-heading">{job.title}</h2>
+          {kicker && <div class="job-kicker">{kicker}</div>}
+        </div>
+        <div class="job-body">
+          <div class="job-copy">
+            {job.conceptImages.length > 0 && (
+              <div class="job-photos">
+                <ConceptImages images={job.conceptImages} />
+              </div>
+            )}
+            <div>
+              {intro && <p class="scope">{intro}</p>}
+              <ScopeList items={job.lineItems} exclusions={job.exclusions} />
+            </div>
+          </div>
+        </div>
       </td>
       <td class="price">
-        <span class="price-value">{formatUsd(job.totalCents)}</span>
+        <PriceBox label={priceLabel} cents={job.totalCents} />
       </td>
     </tr>
   );
@@ -160,7 +194,6 @@ export function ConceptImages({ images }: { images: ConceptImageView[] }) {
       {images.map((image) => (
         <figure class="concept" key={image.url}>
           <img src={image.url} alt="" width={image.width} height={image.height} />
-          <figcaption>Conceptual rendering – not to scale</figcaption>
         </figure>
       ))}
     </>
@@ -168,25 +201,12 @@ export function ConceptImages({ images }: { images: ConceptImageView[] }) {
 }
 
 export function Totals({ totals }: { totals: ProposalView["totals"] }) {
+  if (totals.packages.length <= 1 && totals.jobs.length <= 1) return null;
   return (
     <section class="totals">
-      {totals.jobs.length > 1 &&
-        totals.jobs.map((job) => (
-          <div class="totals-row" key={job.numberLabel}>
-            <span>{job.numberLabel} {job.title}</span>
-            <span>{formatUsd(job.totalCents)}</span>
-          </div>
-        ))}
-      {totals.overheadCents != null && totals.overheadLabel && (
-        <div class="totals-row">
-          <span>{totals.overheadLabel}</span>
-          <span>{formatUsd(totals.overheadCents)}</span>
-        </div>
-      )}
-      <div class="totals-row grand">
-        <span class="totals-label">Total Labor & Materials</span>
-        <span class="price-value">{formatUsd(totals.totalCents)}</span>
-      </div>
+      {totals.packages.map((pkg) => (
+        <PriceBox key={pkg.label} label={pkg.label} cents={pkg.totalCents} />
+      ))}
     </section>
   );
 }
@@ -199,141 +219,192 @@ export function Terms({
   timeframes: string[];
 }) {
   return (
-    <>
-      <div class="sidebar-card">
-        <h2>Code & Material Compliance</h2>
-        <p>
-          All work will be completed in accordance with applicable local building
-          codes and requirements. All hardware, fasteners, structural connections,
-          and materials will be new and code-approved for the intended
-          application, installed per code and manufacturer specifications.
-        </p>
-      </div>
-      <div class="sidebar-card">
-        <h2>Pricing Validity</h2>
-        <p>Pricing valid for 30 days from proposal date.</p>
-      </div>
-      <div class="sidebar-card">
-        <h2>Field Verification</h2>
-        <p>Final dimensions and details will be confirmed in the field.</p>
-      </div>
-      {timeframes.length > 0 && (
-        <div class="sidebar-card">
-          <h2>Project Timeframe</h2>
-          <p>Estimated project timeframe:</p>
-          {timeframes.map((item) => <p key={item}>{item}</p>)}
-          <p>weather depending*.</p>
+    <div>
+      <div class="terms-grid">
+        <div class="term">
+          <Icon d="M4 5h16v2H4zm2 4h12v11H6zm3 2v7h2v-7zm4 0v7h2v-7z" />
+          <div>
+            <h2>Conceptual Renderings</h2>
+            <p>Conceptual renderings are for illustration purposes only.</p>
+          </div>
         </div>
-      )}
-      <div class="sidebar-card">
-        <h2>Scope Changes</h2>
-        <p>Any changes to the scope may affect pricing.</p>
-      </div>
-      <div class="sidebar-card">
-        <h2>Payment Schedule</h2>
-        <p>1/3 deposit • 2/3 at project start • 3/3 upon completion</p>
-      </div>
-      {extraTerms && (
-        <div class="sidebar-card">
-          <h2>Additional Terms</h2>
-          <p>{extraTerms}</p>
+        <div class="term">
+          <Icon d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 5v5l4 2-.7 1.2L11 13V7z" />
+          <div>
+            <h2>Pricing Validity</h2>
+            <p>Pricing valid for 30 days from proposal date.</p>
+          </div>
         </div>
-      )}
-    </>
+        <div class="term">
+          <Icon d="M5 4h14v2H5zm0 4h10v2H5zm0 4h14v2H5zm0 4h8v2H5z" />
+          <div>
+            <h2>Field Verification</h2>
+            <p>Final dimensions and details will be confirmed in the field.</p>
+          </div>
+        </div>
+        <div class="term">
+          <Icon d="M4 6h16v2H4zm2 4h12l-1.5 9h-9z" />
+          <div>
+            <h2>Scope Changes</h2>
+            <p>Any changes to the scope may affect pricing.</p>
+          </div>
+        </div>
+        {timeframes.length > 0 && (
+          <div class="term">
+            <Icon d="M5 3h2v2h10V3h2v2h2v16H3V5h2zm0 4v12h14V7z" />
+            <div>
+              <h2>Project Timeframe</h2>
+              <p>Estimated project timeframe:</p>
+              {timeframes.map((item) => <p key={item}>{item}</p>)}
+              <p>weather depending*.</p>
+            </div>
+          </div>
+        )}
+        <div class="term">
+          <Icon d="M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6zm0 17c-3.2-.6-6-4-6-8.2V7.4L12 5l6 2.4v3.4c0 4.2-2.8 7.6-6 8.2z" />
+          <div>
+            <h2>Payment Schedule</h2>
+            <p>1/3 deposit • 2/3 at project start • 3/3 upon completion</p>
+          </div>
+        </div>
+      </div>
+      {extraTerms && <div class="extra-terms">{extraTerms}</div>}
+    </div>
+  );
+}
+
+export function ThankYouCorner({ businessName }: { businessName: string }) {
+  return (
+    <div class="thank-you-corner">
+      <div class="script">Thank You</div>
+      <div class="rest">FOR CONSIDERING</div>
+      <div class="rest">{businessName}</div>
+    </div>
   );
 }
 
 export function Footer({
   preparedBy,
   businessName,
+  extraTerms,
+  timeframes,
 }: {
   preparedBy: string;
   businessName: string;
+  extraTerms: string | null;
+  timeframes: string[];
 }) {
   return (
     <footer class="closing">
-      <div class="thank-you">
-        <div class="script">Thank You</div>
-        <div class="rest">For considering</div>
-        <div class="rest">{businessName}</div>
-      </div>
-      <div class="sign-row">
-        <div class="sign-by">Proposal by: {preparedBy}</div>
-        <div class="sign-line">
-          Client Signature:
-          <div class="sign-rule" />
+      <div class="closing-grid">
+        <div>
+          <div class="compliance">
+            <div class="compliance-head">
+              <Icon d="M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6zm-1.2 14-3.3-3.3 1.4-1.4 1.9 1.9 4.2-4.2 1.4 1.4z" />
+              <h2>Code & Material Compliance</h2>
+            </div>
+            <p>
+              All work will be completed in accordance with applicable local
+              building codes and requirements. All hardware, fasteners,
+              structural connections, and materials will be new and
+              code-approved for the intended application, installed per code and
+              manufacturer specifications.
+            </p>
+          </div>
+          <div class="sign-block">
+            <div class="sign-by">Proposal by: {preparedBy}</div>
+            <div class="sign-lines">
+              <div class="sign-line">
+                Client Signature:
+                <div class="sign-rule" />
+              </div>
+              <div class="sign-line">
+                Date:
+                <div class="sign-rule" />
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="sign-line">
-          Date:
-          <div class="sign-rule" />
-        </div>
+        <Terms extraTerms={extraTerms} timeframes={timeframes} />
       </div>
+      <ThankYouCorner businessName={businessName} />
     </footer>
   );
 }
 
-export function ProposalDocument({ proposal }: { proposal: ProposalView }) {
-  const conceptImages = proposal.jobs.flatMap((job) => job.conceptImages);
-  const timeframes = proposal.jobs
-    .map((job) => job.timeframe)
-    .filter((value): value is string => value != null);
+function jobPriceLabel(proposal: ProposalView, job: JobView): string {
+  if (!proposal.totals.hasAlternates && proposal.jobs.length === 1) {
+    return "Total Labor & Materials";
+  }
+  if (proposal.totals.hasAlternates) return job.title;
+  return "Price";
+}
+
+export function ProposalDocument({
+  proposal,
+  includeLetterhead = true,
+}: {
+  proposal: ProposalView;
+  includeLetterhead?: boolean;
+}) {
+  const timeframes = [
+    ...new Set(
+      proposal.jobs
+        .map((job) => job.timeframe)
+        .filter((value): value is string => value != null),
+    ),
+  ];
 
   return (
     <html lang="en">
       <head>
         <meta charset="utf-8" />
         <title>{proposal.letterhead.name} Proposal</title>
-        <style>{proposal.fontCss + DOCUMENT_CSS}</style>
+        <style>
+          {proposal.fontCss + DOCUMENT_CSS +
+            (includeLetterhead ? "" : PDF_PAGE_CSS)}
+        </style>
       </head>
       <body>
-        <div class="page">
-          <Letterhead letterhead={proposal.letterhead} />
-          <div class="gold-rule" />
-          {proposal.letterhead.tagline && (
-            <div class="tagline">{proposal.letterhead.tagline}</div>
+        <div class={includeLetterhead ? "page" : "page page-pdf"}>
+          {includeLetterhead && (
+            <>
+              <Letterhead letterhead={proposal.letterhead} />
+              <div class="gold-rule" />
+            </>
           )}
           <div class="body">
-            <div class="main">
-              <ClientBlock
-                projectTitle={proposal.projectTitle}
-                siteAddress={proposal.siteAddress}
-                issueDate={proposal.issueDate}
-                attention={proposal.client.name}
-                proposalNumber={proposal.proposalNumber}
-                validUntil={proposal.validUntil}
-              />
-              <table class="line-items">
-                <thead>
-                  <tr>
-                    <th class="line-no">Line Item</th>
-                    <th>Description</th>
-                    <th class="price">Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {proposal.jobs.map((job) => (
-                    <JobSection key={job.numberLabel} job={job} />
-                  ))}
-                </tbody>
-              </table>
-              <Totals totals={proposal.totals} />
-            </div>
-            <aside class="sidebar">
-              <Terms extraTerms={proposal.extraTerms} timeframes={timeframes} />
-              {conceptImages.length > 0 && (
-                <div class="sidebar-card">
-                  <h2>Conceptual Renderings</h2>
-                  <p>
-                    Conceptual renderings are for illustration purposes only.
-                  </p>
-                  <ConceptImages images={conceptImages} />
-                </div>
-              )}
-            </aside>
+            <ClientBlock
+              projectTitle={proposal.projectTitle}
+              siteAddress={proposal.siteAddress}
+              issueDate={proposal.issueDate}
+              attention={proposal.client.name}
+            />
+            <table class="line-items">
+              <thead>
+                <tr>
+                  <th class="line-no">Line<br />Item</th>
+                  <th class="desc">Description</th>
+                  <th class="price">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {proposal.jobs.map((job) => (
+                  <JobSection
+                    key={job.numberLabel}
+                    job={job}
+                    priceLabel={jobPriceLabel(proposal, job)}
+                  />
+                ))}
+              </tbody>
+            </table>
+            <Totals totals={proposal.totals} />
           </div>
           <Footer
             preparedBy={proposal.preparedBy}
             businessName={proposal.letterhead.name}
+            extraTerms={proposal.extraTerms}
+            timeframes={timeframes}
           />
         </div>
       </body>
@@ -341,22 +412,27 @@ export function ProposalDocument({ proposal }: { proposal: ProposalView }) {
   );
 }
 
-export function renderProposalHtml(proposal: ProposalView): string {
-  return `<!doctype html>${render(<ProposalDocument proposal={proposal} />)}`;
+export function renderProposalHtml(
+  proposal: ProposalView,
+  options: { includeLetterhead?: boolean } = {},
+): string {
+  return `<!doctype html>${
+    render(
+      <ProposalDocument
+        proposal={proposal}
+        includeLetterhead={options.includeLetterhead ?? true}
+      />,
+    )
+  }`;
 }
 
-export function pdfshiftFooterHtml(businessName: string, phone: string | null): string {
-  const left = phone ? `${businessName} · ${phone}` : businessName;
-  return `<div style="font-family:Helvetica,Arial,sans-serif;font-size:9px;color:#333;width:100%;padding:0 36px;display:flex;justify-content:space-between;">
-    <span>${escapeHtml(left)}</span>
-    <span>Page {{page}} of {{total}}</span>
-  </div>`;
+export function renderProposalHeaderHtml(proposal: ProposalView): string {
+  return render(
+    <div class="pdf-header">
+      <style>{proposal.fontCss + HEADER_CSS}</style>
+      <Letterhead letterhead={proposal.letterhead} />
+      <div class="gold-rule" />
+    </div>,
+  );
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}

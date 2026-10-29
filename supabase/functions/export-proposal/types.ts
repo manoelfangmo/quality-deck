@@ -32,6 +32,7 @@ export type JobView = {
   laborCents: number | null;
   totalCents: number;
   conceptImages: ConceptImageView[];
+  alternateOfJobId: string | null;
 };
 
 export type LetterheadView = {
@@ -52,8 +53,17 @@ export type ClientView = {
   address: AddressView | null;
 };
 
+export type PackageView = {
+  label: string;
+  subtotalCents: number;
+  overheadCents: number | null;
+  totalCents: number;
+};
+
 export type TotalsView = {
   jobs: { numberLabel: string; title: string; totalCents: number }[];
+  packages: PackageView[];
+  hasAlternates: boolean;
   subtotalCents: number;
   overheadLabel: string | null;
   overheadCents: number | null;
@@ -104,6 +114,7 @@ export type LoadedJob = {
   laborHours: unknown;
   laborRateCents: number | null;
   createdAt: string;
+  alternateOfJobId: string | null;
   lineItems: LoadedLineItem[];
   photos: LoadedPhoto[];
 };

@@ -60,7 +60,7 @@ final class ExportProposalControllerProvider
 }
 
 String _$exportProposalControllerHash() =>
-    r'4fa40b79055f9775c5957367657d1467d3485054';
+    r'1f5e3cc5a43406c3fc763ee3312dd5df7bb6652a';
 
 final class ExportProposalControllerFamily extends $Family
     with

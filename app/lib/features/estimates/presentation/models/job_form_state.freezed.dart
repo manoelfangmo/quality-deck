@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$JobFormState {
 
- String? get jobId; String get title; JobType? get jobType; String get description; bool get isSubmitting; bool get submitted; String? get errorMessage; String? get titleError; String? get jobTypeError; String? get descriptionError;
+ String? get jobId; String get title; JobType? get jobType; String get description; bool get isAlternate; String? get alternateOfJobId; bool get isSubmitting; bool get submitted; String? get errorMessage; String? get titleError; String? get jobTypeError; String? get descriptionError; String? get alternateOfJobIdError;
 /// Create a copy of JobFormState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $JobFormStateCopyWith<JobFormState> get copyWith => _$JobFormStateCopyWithImpl<J
 @override
 bool operator ==(Object other) {
   final _this = this as JobFormState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is JobFormState&&(identical(other.jobId, _this.jobId) || other.jobId == _this.jobId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.jobType, _this.jobType) || other.jobType == _this.jobType)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.isSubmitting, _this.isSubmitting) || other.isSubmitting == _this.isSubmitting)&&(identical(other.submitted, _this.submitted) || other.submitted == _this.submitted)&&(identical(other.errorMessage, _this.errorMessage) || other.errorMessage == _this.errorMessage)&&(identical(other.titleError, _this.titleError) || other.titleError == _this.titleError)&&(identical(other.jobTypeError, _this.jobTypeError) || other.jobTypeError == _this.jobTypeError)&&(identical(other.descriptionError, _this.descriptionError) || other.descriptionError == _this.descriptionError));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is JobFormState&&(identical(other.jobId, _this.jobId) || other.jobId == _this.jobId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.jobType, _this.jobType) || other.jobType == _this.jobType)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.isAlternate, _this.isAlternate) || other.isAlternate == _this.isAlternate)&&(identical(other.alternateOfJobId, _this.alternateOfJobId) || other.alternateOfJobId == _this.alternateOfJobId)&&(identical(other.isSubmitting, _this.isSubmitting) || other.isSubmitting == _this.isSubmitting)&&(identical(other.submitted, _this.submitted) || other.submitted == _this.submitted)&&(identical(other.errorMessage, _this.errorMessage) || other.errorMessage == _this.errorMessage)&&(identical(other.titleError, _this.titleError) || other.titleError == _this.titleError)&&(identical(other.jobTypeError, _this.jobTypeError) || other.jobTypeError == _this.jobTypeError)&&(identical(other.descriptionError, _this.descriptionError) || other.descriptionError == _this.descriptionError)&&(identical(other.alternateOfJobIdError, _this.alternateOfJobIdError) || other.alternateOfJobIdError == _this.alternateOfJobIdError));
 }
 
 
 @override
 int get hashCode {
   final _this = this as JobFormState;
-  return Object.hash(runtimeType,_this.jobId,_this.title,_this.jobType,_this.description,_this.isSubmitting,_this.submitted,_this.errorMessage,_this.titleError,_this.jobTypeError,_this.descriptionError);
+  return Object.hash(runtimeType,_this.jobId,_this.title,_this.jobType,_this.description,_this.isAlternate,_this.alternateOfJobId,_this.isSubmitting,_this.submitted,_this.errorMessage,_this.titleError,_this.jobTypeError,_this.descriptionError,_this.alternateOfJobIdError);
 }
 
 @override
 String toString() {
   final _this = this as JobFormState;
-  return 'JobFormState(jobId: ${_this.jobId}, title: ${_this.title}, jobType: ${_this.jobType}, description: ${_this.description}, isSubmitting: ${_this.isSubmitting}, submitted: ${_this.submitted}, errorMessage: ${_this.errorMessage}, titleError: ${_this.titleError}, jobTypeError: ${_this.jobTypeError}, descriptionError: ${_this.descriptionError})';
+  return 'JobFormState(jobId: ${_this.jobId}, title: ${_this.title}, jobType: ${_this.jobType}, description: ${_this.description}, isAlternate: ${_this.isAlternate}, alternateOfJobId: ${_this.alternateOfJobId}, isSubmitting: ${_this.isSubmitting}, submitted: ${_this.submitted}, errorMessage: ${_this.errorMessage}, titleError: ${_this.titleError}, jobTypeError: ${_this.jobTypeError}, descriptionError: ${_this.descriptionError}, alternateOfJobIdError: ${_this.alternateOfJobIdError})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $JobFormStateCopyWith<$Res>  {
   factory $JobFormStateCopyWith(JobFormState value, $Res Function(JobFormState) _then) = _$JobFormStateCopyWithImpl;
 @useResult
 $Res call({
- String? jobId, String title, JobType? jobType, String description, bool isSubmitting, bool submitted, String? errorMessage, String? titleError, String? jobTypeError, String? descriptionError
+ String? jobId, String title, JobType? jobType, String description, bool isAlternate, String? alternateOfJobId, bool isSubmitting, bool submitted, String? errorMessage, String? titleError, String? jobTypeError, String? descriptionError, String? alternateOfJobIdError
 });
 
 
@@ -68,18 +68,21 @@ class _$JobFormStateCopyWithImpl<$Res>
 
 /// Create a copy of JobFormState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? jobId = freezed,Object? title = null,Object? jobType = freezed,Object? description = null,Object? isSubmitting = null,Object? submitted = null,Object? errorMessage = freezed,Object? titleError = freezed,Object? jobTypeError = freezed,Object? descriptionError = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? jobId = freezed,Object? title = null,Object? jobType = freezed,Object? description = null,Object? isAlternate = null,Object? alternateOfJobId = freezed,Object? isSubmitting = null,Object? submitted = null,Object? errorMessage = freezed,Object? titleError = freezed,Object? jobTypeError = freezed,Object? descriptionError = freezed,Object? alternateOfJobIdError = freezed,}) {
   return _then(JobFormState(
 jobId: freezed == jobId ? _self.jobId : jobId // ignore: cast_nullable_to_non_nullable
 as String?,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,jobType: freezed == jobType ? _self.jobType : jobType // ignore: cast_nullable_to_non_nullable
 as JobType?,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String,isSubmitting: null == isSubmitting ? _self.isSubmitting : isSubmitting // ignore: cast_nullable_to_non_nullable
+as String,isAlternate: null == isAlternate ? _self.isAlternate : isAlternate // ignore: cast_nullable_to_non_nullable
+as bool,alternateOfJobId: freezed == alternateOfJobId ? _self.alternateOfJobId : alternateOfJobId // ignore: cast_nullable_to_non_nullable
+as String?,isSubmitting: null == isSubmitting ? _self.isSubmitting : isSubmitting // ignore: cast_nullable_to_non_nullable
 as bool,submitted: null == submitted ? _self.submitted : submitted // ignore: cast_nullable_to_non_nullable
 as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,titleError: freezed == titleError ? _self.titleError : titleError // ignore: cast_nullable_to_non_nullable
 as String?,jobTypeError: freezed == jobTypeError ? _self.jobTypeError : jobTypeError // ignore: cast_nullable_to_non_nullable
 as String?,descriptionError: freezed == descriptionError ? _self.descriptionError : descriptionError // ignore: cast_nullable_to_non_nullable
+as String?,alternateOfJobIdError: freezed == alternateOfJobIdError ? _self.alternateOfJobIdError : alternateOfJobIdError // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -165,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? jobId,  String title,  JobType? jobType,  String description,  bool isSubmitting,  bool submitted,  String? errorMessage,  String? titleError,  String? jobTypeError,  String? descriptionError)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? jobId,  String title,  JobType? jobType,  String description,  bool isAlternate,  String? alternateOfJobId,  bool isSubmitting,  bool submitted,  String? errorMessage,  String? titleError,  String? jobTypeError,  String? descriptionError,  String? alternateOfJobIdError)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _JobFormState() when $default != null:
-return $default(_that.jobId,_that.title,_that.jobType,_that.description,_that.isSubmitting,_that.submitted,_that.errorMessage,_that.titleError,_that.jobTypeError,_that.descriptionError);case _:
+return $default(_that.jobId,_that.title,_that.jobType,_that.description,_that.isAlternate,_that.alternateOfJobId,_that.isSubmitting,_that.submitted,_that.errorMessage,_that.titleError,_that.jobTypeError,_that.descriptionError,_that.alternateOfJobIdError);case _:
   return orElse();
 
 }
@@ -186,10 +189,10 @@ return $default(_that.jobId,_that.title,_that.jobType,_that.description,_that.is
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? jobId,  String title,  JobType? jobType,  String description,  bool isSubmitting,  bool submitted,  String? errorMessage,  String? titleError,  String? jobTypeError,  String? descriptionError)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? jobId,  String title,  JobType? jobType,  String description,  bool isAlternate,  String? alternateOfJobId,  bool isSubmitting,  bool submitted,  String? errorMessage,  String? titleError,  String? jobTypeError,  String? descriptionError,  String? alternateOfJobIdError)  $default,) {final _that = this;
 switch (_that) {
 case _JobFormState():
-return $default(_that.jobId,_that.title,_that.jobType,_that.description,_that.isSubmitting,_that.submitted,_that.errorMessage,_that.titleError,_that.jobTypeError,_that.descriptionError);case _:
+return $default(_that.jobId,_that.title,_that.jobType,_that.description,_that.isAlternate,_that.alternateOfJobId,_that.isSubmitting,_that.submitted,_that.errorMessage,_that.titleError,_that.jobTypeError,_that.descriptionError,_that.alternateOfJobIdError);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +209,10 @@ return $default(_that.jobId,_that.title,_that.jobType,_that.description,_that.is
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? jobId,  String title,  JobType? jobType,  String description,  bool isSubmitting,  bool submitted,  String? errorMessage,  String? titleError,  String? jobTypeError,  String? descriptionError)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? jobId,  String title,  JobType? jobType,  String description,  bool isAlternate,  String? alternateOfJobId,  bool isSubmitting,  bool submitted,  String? errorMessage,  String? titleError,  String? jobTypeError,  String? descriptionError,  String? alternateOfJobIdError)?  $default,) {final _that = this;
 switch (_that) {
 case _JobFormState() when $default != null:
-return $default(_that.jobId,_that.title,_that.jobType,_that.description,_that.isSubmitting,_that.submitted,_that.errorMessage,_that.titleError,_that.jobTypeError,_that.descriptionError);case _:
+return $default(_that.jobId,_that.title,_that.jobType,_that.description,_that.isAlternate,_that.alternateOfJobId,_that.isSubmitting,_that.submitted,_that.errorMessage,_that.titleError,_that.jobTypeError,_that.descriptionError,_that.alternateOfJobIdError);case _:
   return null;
 
 }
@@ -221,19 +224,22 @@ return $default(_that.jobId,_that.title,_that.jobType,_that.description,_that.is
 
 
 class _JobFormState extends JobFormState {
-  const _JobFormState({this.jobId, this.title = '', this.jobType, this.description = '', this.isSubmitting = false, this.submitted = false, this.errorMessage, this.titleError, this.jobTypeError, this.descriptionError}): super._();
+  const _JobFormState({this.jobId, this.title = '', this.jobType, this.description = '', this.isAlternate = false, this.alternateOfJobId, this.isSubmitting = false, this.submitted = false, this.errorMessage, this.titleError, this.jobTypeError, this.descriptionError, this.alternateOfJobIdError}): super._();
   
 
 @override final  String? jobId;
 @override@JsonKey() final  String title;
 @override final  JobType? jobType;
 @override@JsonKey() final  String description;
+@override@JsonKey() final  bool isAlternate;
+@override final  String? alternateOfJobId;
 @override@JsonKey() final  bool isSubmitting;
 @override@JsonKey() final  bool submitted;
 @override final  String? errorMessage;
 @override final  String? titleError;
 @override final  String? jobTypeError;
 @override final  String? descriptionError;
+@override final  String? alternateOfJobIdError;
 
 /// Create a copy of JobFormState
 /// with the given fields replaced by the non-null parameter values.
@@ -245,18 +251,18 @@ _$JobFormStateCopyWith<_JobFormState> get copyWith => __$JobFormStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _JobFormState&&(identical(other.jobId, jobId) || other.jobId == jobId)&&(identical(other.title, title) || other.title == title)&&(identical(other.jobType, jobType) || other.jobType == jobType)&&(identical(other.description, description) || other.description == description)&&(identical(other.isSubmitting, isSubmitting) || other.isSubmitting == isSubmitting)&&(identical(other.submitted, submitted) || other.submitted == submitted)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.titleError, titleError) || other.titleError == titleError)&&(identical(other.jobTypeError, jobTypeError) || other.jobTypeError == jobTypeError)&&(identical(other.descriptionError, descriptionError) || other.descriptionError == descriptionError));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _JobFormState&&(identical(other.jobId, jobId) || other.jobId == jobId)&&(identical(other.title, title) || other.title == title)&&(identical(other.jobType, jobType) || other.jobType == jobType)&&(identical(other.description, description) || other.description == description)&&(identical(other.isAlternate, isAlternate) || other.isAlternate == isAlternate)&&(identical(other.alternateOfJobId, alternateOfJobId) || other.alternateOfJobId == alternateOfJobId)&&(identical(other.isSubmitting, isSubmitting) || other.isSubmitting == isSubmitting)&&(identical(other.submitted, submitted) || other.submitted == submitted)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.titleError, titleError) || other.titleError == titleError)&&(identical(other.jobTypeError, jobTypeError) || other.jobTypeError == jobTypeError)&&(identical(other.descriptionError, descriptionError) || other.descriptionError == descriptionError)&&(identical(other.alternateOfJobIdError, alternateOfJobIdError) || other.alternateOfJobIdError == alternateOfJobIdError));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,jobId,title,jobType,description,isSubmitting,submitted,errorMessage,titleError,jobTypeError,descriptionError);
+    return Object.hash(runtimeType,jobId,title,jobType,description,isAlternate,alternateOfJobId,isSubmitting,submitted,errorMessage,titleError,jobTypeError,descriptionError,alternateOfJobIdError);
 }
 
 @override
 String toString() {
-    return 'JobFormState(jobId: $jobId, title: $title, jobType: $jobType, description: $description, isSubmitting: $isSubmitting, submitted: $submitted, errorMessage: $errorMessage, titleError: $titleError, jobTypeError: $jobTypeError, descriptionError: $descriptionError)';
+    return 'JobFormState(jobId: $jobId, title: $title, jobType: $jobType, description: $description, isAlternate: $isAlternate, alternateOfJobId: $alternateOfJobId, isSubmitting: $isSubmitting, submitted: $submitted, errorMessage: $errorMessage, titleError: $titleError, jobTypeError: $jobTypeError, descriptionError: $descriptionError, alternateOfJobIdError: $alternateOfJobIdError)';
 }
 
 
@@ -267,7 +273,7 @@ abstract mixin class _$JobFormStateCopyWith<$Res> implements $JobFormStateCopyWi
   factory _$JobFormStateCopyWith(_JobFormState value, $Res Function(_JobFormState) _then) = __$JobFormStateCopyWithImpl;
 @override @useResult
 $Res call({
- String? jobId, String title, JobType? jobType, String description, bool isSubmitting, bool submitted, String? errorMessage, String? titleError, String? jobTypeError, String? descriptionError
+ String? jobId, String title, JobType? jobType, String description, bool isAlternate, String? alternateOfJobId, bool isSubmitting, bool submitted, String? errorMessage, String? titleError, String? jobTypeError, String? descriptionError, String? alternateOfJobIdError
 });
 
 
@@ -284,18 +290,21 @@ class __$JobFormStateCopyWithImpl<$Res>
 
 /// Create a copy of JobFormState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? jobId = freezed,Object? title = null,Object? jobType = freezed,Object? description = null,Object? isSubmitting = null,Object? submitted = null,Object? errorMessage = freezed,Object? titleError = freezed,Object? jobTypeError = freezed,Object? descriptionError = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? jobId = freezed,Object? title = null,Object? jobType = freezed,Object? description = null,Object? isAlternate = null,Object? alternateOfJobId = freezed,Object? isSubmitting = null,Object? submitted = null,Object? errorMessage = freezed,Object? titleError = freezed,Object? jobTypeError = freezed,Object? descriptionError = freezed,Object? alternateOfJobIdError = freezed,}) {
   return _then(_JobFormState(
 jobId: freezed == jobId ? _self.jobId : jobId // ignore: cast_nullable_to_non_nullable
 as String?,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,jobType: freezed == jobType ? _self.jobType : jobType // ignore: cast_nullable_to_non_nullable
 as JobType?,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String,isSubmitting: null == isSubmitting ? _self.isSubmitting : isSubmitting // ignore: cast_nullable_to_non_nullable
+as String,isAlternate: null == isAlternate ? _self.isAlternate : isAlternate // ignore: cast_nullable_to_non_nullable
+as bool,alternateOfJobId: freezed == alternateOfJobId ? _self.alternateOfJobId : alternateOfJobId // ignore: cast_nullable_to_non_nullable
+as String?,isSubmitting: null == isSubmitting ? _self.isSubmitting : isSubmitting // ignore: cast_nullable_to_non_nullable
 as bool,submitted: null == submitted ? _self.submitted : submitted // ignore: cast_nullable_to_non_nullable
 as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,titleError: freezed == titleError ? _self.titleError : titleError // ignore: cast_nullable_to_non_nullable
 as String?,jobTypeError: freezed == jobTypeError ? _self.jobTypeError : jobTypeError // ignore: cast_nullable_to_non_nullable
 as String?,descriptionError: freezed == descriptionError ? _self.descriptionError : descriptionError // ignore: cast_nullable_to_non_nullable
+as String?,alternateOfJobIdError: freezed == alternateOfJobIdError ? _self.alternateOfJobIdError : alternateOfJobIdError // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

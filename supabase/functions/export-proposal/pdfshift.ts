@@ -19,7 +19,8 @@ export type PdfShiftRequest = {
   html: string;
   apiKey: string;
   sandbox: boolean;
-  footerHtml: string;
+  footerHtml?: string;
+  headerHtml?: string;
   fetchImpl?: typeof fetch;
 };
 
@@ -63,8 +64,18 @@ async function convertOnce(
         source: request.html,
         sandbox: request.sandbox,
         format: "Letter",
-        margin: { top: "0px", right: "0px", bottom: "42px", left: "0px" },
-        footer: { source: request.footerHtml, spacing: "8" },
+        margin: {
+          top: request.headerHtml ? "1.35in" : "0px",
+          right: "0px",
+          bottom: "0px",
+          left: "0px",
+        },
+        header: request.headerHtml
+          ? { source: request.headerHtml, spacing: "0" }
+          : undefined,
+        footer: request.footerHtml
+          ? { source: request.footerHtml, spacing: "8" }
+          : undefined,
         use_print: true,
       }),
       signal: controller.signal,

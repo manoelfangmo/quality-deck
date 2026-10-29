@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Job {
 
- String get id; String get projectId; String get title; JobType get jobType; String? get description; Labor? get labor; DateTime get createdAt; int get number;
+ String get id; String get projectId; String get title; JobType get jobType; String? get description; Labor? get labor; String? get alternateOfJobId; DateTime get createdAt; int get number;
 /// Create a copy of Job
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $JobCopyWith<Job> get copyWith => _$JobCopyWithImpl<Job>(this as Job, _$identity
 @override
 bool operator ==(Object other) {
   final _this = this as Job;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Job&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.projectId, _this.projectId) || other.projectId == _this.projectId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.jobType, _this.jobType) || other.jobType == _this.jobType)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.labor, _this.labor) || other.labor == _this.labor)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.number, _this.number) || other.number == _this.number));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Job&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.projectId, _this.projectId) || other.projectId == _this.projectId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.jobType, _this.jobType) || other.jobType == _this.jobType)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.labor, _this.labor) || other.labor == _this.labor)&&(identical(other.alternateOfJobId, _this.alternateOfJobId) || other.alternateOfJobId == _this.alternateOfJobId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.number, _this.number) || other.number == _this.number));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Job;
-  return Object.hash(runtimeType,_this.id,_this.projectId,_this.title,_this.jobType,_this.description,_this.labor,_this.createdAt,_this.number);
+  return Object.hash(runtimeType,_this.id,_this.projectId,_this.title,_this.jobType,_this.description,_this.labor,_this.alternateOfJobId,_this.createdAt,_this.number);
 }
 
 @override
 String toString() {
   final _this = this as Job;
-  return 'Job(id: ${_this.id}, projectId: ${_this.projectId}, title: ${_this.title}, jobType: ${_this.jobType}, description: ${_this.description}, labor: ${_this.labor}, createdAt: ${_this.createdAt}, number: ${_this.number})';
+  return 'Job(id: ${_this.id}, projectId: ${_this.projectId}, title: ${_this.title}, jobType: ${_this.jobType}, description: ${_this.description}, labor: ${_this.labor}, alternateOfJobId: ${_this.alternateOfJobId}, createdAt: ${_this.createdAt}, number: ${_this.number})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $JobCopyWith<$Res>  {
   factory $JobCopyWith(Job value, $Res Function(Job) _then) = _$JobCopyWithImpl;
 @useResult
 $Res call({
- String id, String projectId, String title, JobType jobType, String? description, Labor? labor, DateTime createdAt, int number
+ String id, String projectId, String title, JobType jobType, String? description, Labor? labor, String? alternateOfJobId, DateTime createdAt, int number
 });
 
 
@@ -68,7 +68,7 @@ class _$JobCopyWithImpl<$Res>
 
 /// Create a copy of Job
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? projectId = null,Object? title = null,Object? jobType = null,Object? description = freezed,Object? labor = freezed,Object? createdAt = null,Object? number = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? projectId = null,Object? title = null,Object? jobType = null,Object? description = freezed,Object? labor = freezed,Object? alternateOfJobId = freezed,Object? createdAt = null,Object? number = null,}) {
   return _then(Job(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,projectId: null == projectId ? _self.projectId : projectId // ignore: cast_nullable_to_non_nullable
@@ -76,7 +76,8 @@ as String,title: null == title ? _self.title : title // ignore: cast_nullable_to
 as String,jobType: null == jobType ? _self.jobType : jobType // ignore: cast_nullable_to_non_nullable
 as JobType,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,labor: freezed == labor ? _self.labor : labor // ignore: cast_nullable_to_non_nullable
-as Labor?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as Labor?,alternateOfJobId: freezed == alternateOfJobId ? _self.alternateOfJobId : alternateOfJobId // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,number: null == number ? _self.number : number // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -175,10 +176,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String projectId,  String title,  JobType jobType,  String? description,  Labor? labor,  DateTime createdAt,  int number)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String projectId,  String title,  JobType jobType,  String? description,  Labor? labor,  String? alternateOfJobId,  DateTime createdAt,  int number)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Job() when $default != null:
-return $default(_that.id,_that.projectId,_that.title,_that.jobType,_that.description,_that.labor,_that.createdAt,_that.number);case _:
+return $default(_that.id,_that.projectId,_that.title,_that.jobType,_that.description,_that.labor,_that.alternateOfJobId,_that.createdAt,_that.number);case _:
   return orElse();
 
 }
@@ -196,10 +197,10 @@ return $default(_that.id,_that.projectId,_that.title,_that.jobType,_that.descrip
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String projectId,  String title,  JobType jobType,  String? description,  Labor? labor,  DateTime createdAt,  int number)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String projectId,  String title,  JobType jobType,  String? description,  Labor? labor,  String? alternateOfJobId,  DateTime createdAt,  int number)  $default,) {final _that = this;
 switch (_that) {
 case _Job():
-return $default(_that.id,_that.projectId,_that.title,_that.jobType,_that.description,_that.labor,_that.createdAt,_that.number);case _:
+return $default(_that.id,_that.projectId,_that.title,_that.jobType,_that.description,_that.labor,_that.alternateOfJobId,_that.createdAt,_that.number);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -216,10 +217,10 @@ return $default(_that.id,_that.projectId,_that.title,_that.jobType,_that.descrip
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String projectId,  String title,  JobType jobType,  String? description,  Labor? labor,  DateTime createdAt,  int number)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String projectId,  String title,  JobType jobType,  String? description,  Labor? labor,  String? alternateOfJobId,  DateTime createdAt,  int number)?  $default,) {final _that = this;
 switch (_that) {
 case _Job() when $default != null:
-return $default(_that.id,_that.projectId,_that.title,_that.jobType,_that.description,_that.labor,_that.createdAt,_that.number);case _:
+return $default(_that.id,_that.projectId,_that.title,_that.jobType,_that.description,_that.labor,_that.alternateOfJobId,_that.createdAt,_that.number);case _:
   return null;
 
 }
@@ -231,7 +232,7 @@ return $default(_that.id,_that.projectId,_that.title,_that.jobType,_that.descrip
 
 
 class _Job extends Job {
-  const _Job({required this.id, required this.projectId, required this.title, required this.jobType, this.description, this.labor, required this.createdAt, this.number = 0}): super._();
+  const _Job({required this.id, required this.projectId, required this.title, required this.jobType, this.description, this.labor, this.alternateOfJobId, required this.createdAt, this.number = 0}): super._();
   
 
 @override final  String id;
@@ -240,6 +241,7 @@ class _Job extends Job {
 @override final  JobType jobType;
 @override final  String? description;
 @override final  Labor? labor;
+@override final  String? alternateOfJobId;
 @override final  DateTime createdAt;
 @override@JsonKey() final  int number;
 
@@ -253,18 +255,18 @@ _$JobCopyWith<_Job> get copyWith => __$JobCopyWithImpl<_Job>(this, _$identity);
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Job&&(identical(other.id, id) || other.id == id)&&(identical(other.projectId, projectId) || other.projectId == projectId)&&(identical(other.title, title) || other.title == title)&&(identical(other.jobType, jobType) || other.jobType == jobType)&&(identical(other.description, description) || other.description == description)&&(identical(other.labor, labor) || other.labor == labor)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.number, number) || other.number == number));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Job&&(identical(other.id, id) || other.id == id)&&(identical(other.projectId, projectId) || other.projectId == projectId)&&(identical(other.title, title) || other.title == title)&&(identical(other.jobType, jobType) || other.jobType == jobType)&&(identical(other.description, description) || other.description == description)&&(identical(other.labor, labor) || other.labor == labor)&&(identical(other.alternateOfJobId, alternateOfJobId) || other.alternateOfJobId == alternateOfJobId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.number, number) || other.number == number));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,projectId,title,jobType,description,labor,createdAt,number);
+    return Object.hash(runtimeType,id,projectId,title,jobType,description,labor,alternateOfJobId,createdAt,number);
 }
 
 @override
 String toString() {
-    return 'Job(id: $id, projectId: $projectId, title: $title, jobType: $jobType, description: $description, labor: $labor, createdAt: $createdAt, number: $number)';
+    return 'Job(id: $id, projectId: $projectId, title: $title, jobType: $jobType, description: $description, labor: $labor, alternateOfJobId: $alternateOfJobId, createdAt: $createdAt, number: $number)';
 }
 
 
@@ -275,7 +277,7 @@ abstract mixin class _$JobCopyWith<$Res> implements $JobCopyWith<$Res> {
   factory _$JobCopyWith(_Job value, $Res Function(_Job) _then) = __$JobCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String projectId, String title, JobType jobType, String? description, Labor? labor, DateTime createdAt, int number
+ String id, String projectId, String title, JobType jobType, String? description, Labor? labor, String? alternateOfJobId, DateTime createdAt, int number
 });
 
 
@@ -292,7 +294,7 @@ class __$JobCopyWithImpl<$Res>
 
 /// Create a copy of Job
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? projectId = null,Object? title = null,Object? jobType = null,Object? description = freezed,Object? labor = freezed,Object? createdAt = null,Object? number = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? projectId = null,Object? title = null,Object? jobType = null,Object? description = freezed,Object? labor = freezed,Object? alternateOfJobId = freezed,Object? createdAt = null,Object? number = null,}) {
   return _then(_Job(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,projectId: null == projectId ? _self.projectId : projectId // ignore: cast_nullable_to_non_nullable
@@ -300,7 +302,8 @@ as String,title: null == title ? _self.title : title // ignore: cast_nullable_to
 as String,jobType: null == jobType ? _self.jobType : jobType // ignore: cast_nullable_to_non_nullable
 as JobType,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,labor: freezed == labor ? _self.labor : labor // ignore: cast_nullable_to_non_nullable
-as Labor?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as Labor?,alternateOfJobId: freezed == alternateOfJobId ? _self.alternateOfJobId : alternateOfJobId // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,number: null == number ? _self.number : number // ignore: cast_nullable_to_non_nullable
 as int,
   ));

@@ -5,6 +5,7 @@ import type {
   LoadedJob,
   LoadedLineItem,
   LoadedProject,
+  PackageView,
   ProposalView,
 } from "./types.ts";
 
@@ -65,25 +66,98 @@ export function jobTotalCents(job: LoadedJob): number {
   return total + laborTotalCents(job);
 }
 
+type JobTotalRow = { job: LoadedJob; totalCents: number };
+
+function packRows(
+  label: string,
+  rows: JobTotalRow[],
+  overheadBps: number | null,
+): PackageView & { jobs: LoadedJob[] } {
+  const subtotalCents = rows.reduce((sum, row) => sum + row.totalCents, 0);
+  const overheadCents = overheadBps == null
+    ? null
+    : overheadAmountCents(subtotalCents, overheadBps);
+  return {
+    label,
+    jobs: rows.map((row) => row.job),
+    subtotalCents,
+    overheadCents,
+    totalCents: subtotalCents + (overheadCents ?? 0),
+  };
+}
+
+export function proposalPackages(project: LoadedProject): PackageView[] {
+  return proposalPackageDetails(project).map((pkg) => ({
+    label: pkg.label,
+    subtotalCents: pkg.subtotalCents,
+    overheadCents: pkg.overheadCents,
+    totalCents: pkg.totalCents,
+  }));
+}
+
+function proposalPackageDetails(project: LoadedProject) {
+  const jobTotals: JobTotalRow[] = project.jobs.map((job) => ({
+    job,
+    totalCents: jobTotalCents(job),
+  }));
+  const byId = new Map(jobTotals.map((row) => [row.job.id, row]));
+  const defaultRows = jobTotals.filter((row) => row.job.alternateOfJobId == null);
+  const alternates = jobTotals.filter((row) => row.job.alternateOfJobId != null);
+  const overheadBps = project.overheadBps;
+
+  if (alternates.length === 0) {
+    return [packRows("Total Labor & Materials", defaultRows, overheadBps)];
+  }
+
+  const replacedIds = [
+    ...new Set(
+      alternates
+        .map((row) => row.job.alternateOfJobId)
+        .filter((id): id is string => id != null),
+    ),
+  ];
+  const titles = replacedIds
+    .map((id) => byId.get(id)?.job.title)
+    .filter((title): title is string => title != null);
+  const defaultLabel = titles.length === 0
+    ? "Total Labor & Materials"
+    : `Total with ${titles.join(" + ")}`;
+
+  return [
+    packRows(defaultLabel, defaultRows, overheadBps),
+    ...alternates.map((alt) =>
+      packRows(
+        `Total with ${alt.job.title}`,
+        defaultRows.map((row) =>
+          row.job.id === alt.job.alternateOfJobId ? alt : row
+        ),
+        overheadBps,
+      )
+    ),
+  ];
+}
+
 export function proposalTotals(project: LoadedProject): {
-  jobs: { job: LoadedJob; totalCents: number }[];
+  jobs: JobTotalRow[];
   subtotalCents: number;
   overheadCents: number | null;
   totalCents: number;
 } {
-  const jobs = project.jobs.map((job) => ({
+  const jobs: JobTotalRow[] = project.jobs.map((job) => ({
     job,
     totalCents: jobTotalCents(job),
   }));
-  const subtotalCents = jobs.reduce((sum, row) => sum + row.totalCents, 0);
-  const overheadCents = project.overheadBps == null
-    ? null
-    : overheadAmountCents(subtotalCents, project.overheadBps);
+  const packages = proposalPackages(project);
+  const fallback = packages[0] ?? {
+    subtotalCents: 0,
+    overheadCents: null,
+    totalCents: 0,
+  };
   return {
     jobs,
-    subtotalCents,
-    overheadCents,
-    totalCents: subtotalCents + (overheadCents ?? 0),
+    subtotalCents: fallback.subtotalCents,
+    overheadCents: fallback.overheadCents,
+    totalCents: fallback.totalCents,
   };
 }
 
@@ -122,9 +196,9 @@ export function formatUsd(cents: number): string {
   const absolute = Math.abs(cents);
   const dollars = Math.floor(absolute / 100);
   const remainder = absolute % 100;
-  return `${sign}$${dollars.toLocaleString("en-US")}.${
-    remainder.toString().padStart(2, "0")
-  }`;
+  const dollarPart = `${sign}$${dollars.toLocaleString("en-US")}`;
+  if (remainder === 0) return dollarPart;
+  return `${dollarPart}.${remainder.toString().padStart(2, "0")}`;
 }
 
 export function formatProposalNumber(
@@ -256,6 +330,7 @@ export function toProposalView(
         .map(toLineItemView),
       laborCents: labor > 0 ? labor : null,
       totalCents: row.totalCents,
+      alternateOfJobId: blankToNull(row.job.alternateOfJobId),
       conceptImages: row.job.photos
         .filter((photo) => photo.kind === "concept")
         .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
@@ -318,6 +393,8 @@ export function toProposalView(
         title: job.title,
         totalCents: job.totalCents,
       })),
+      packages: proposalPackages(project),
+      hasAlternates: project.jobs.some((job) => job.alternateOfJobId != null),
       subtotalCents: totals.subtotalCents,
       overheadLabel,
       overheadCents: totals.overheadCents,

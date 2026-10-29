@@ -69,6 +69,7 @@ function mapJob(row: Json): LoadedJob {
     laborHours: row.labor_hours,
     laborRateCents: asNumberOrNull(row.labor_rate_cents),
     createdAt: asString(row.created_at),
+    alternateOfJobId: asStringOrNull(row.alternate_of_job_id),
     lineItems: asArray(row.line_items).map(mapLine),
     photos: asArray(row.job_photos).map(mapPhoto),
   };
@@ -144,7 +145,7 @@ const PROJECT_SELECT = `
   ),
   jobs (
     id, title, job_type, description, exclusions, timeframe,
-    labor_hours, labor_rate_cents, created_at,
+    labor_hours, labor_rate_cents, created_at, alternate_of_job_id,
     line_items (
       name, description, quantity, pricing_type,
       saved_price_cents, override_price_cents, is_custom, position

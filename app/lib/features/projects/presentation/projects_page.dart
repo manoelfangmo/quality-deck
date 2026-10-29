@@ -41,26 +41,24 @@ class ProjectsPage extends ConsumerWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Flexible(
-                  child: SegmentedButton<ProjectView>(
-                    segments: const [
-                      ButtonSegment(
-                        value: ProjectView.active,
-                        label: Text('Active'),
-                      ),
-                      ButtonSegment(
-                        value: ProjectView.archived,
-                        label: Text('Archived'),
-                      ),
-                    ],
-                    selected: {table.view},
-                    showSelectedIcon: false,
-                    onSelectionChanged: (selected) {
-                      ref
-                          .read(projectsTableControllerProvider.notifier)
-                          .setView(selected.first);
-                    },
-                  ),
+                SegmentedButton<ProjectView>(
+                  segments: const [
+                    ButtonSegment(
+                      value: ProjectView.active,
+                      label: Text('Active'),
+                    ),
+                    ButtonSegment(
+                      value: ProjectView.archived,
+                      label: Text('Archived'),
+                    ),
+                  ],
+                  selected: {table.view},
+                  showSelectedIcon: false,
+                  onSelectionChanged: (selected) {
+                    ref
+                        .read(projectsTableControllerProvider.notifier)
+                        .setView(selected.first);
+                  },
                 ),
                 const SizedBox(width: 12),
                 _AddProjectButton(
@@ -88,8 +86,7 @@ class ProjectsPage extends ConsumerWidget {
                   return PaginatedTableComponent<ProjectRow>(
                     showSearchField: false,
                     hasFlexibleRowHeight: true,
-                    onTap: (row) =>
-                        context.go(ProjectRoute(row.id).location),
+                    onTap: (row) => context.go(ProjectRoute(row.id).location),
                     columns: _columns(
                       context,
                       ref,
@@ -118,17 +115,11 @@ class ProjectsPage extends ConsumerWidget {
     required String timeZone,
   }) {
     return [
-      TableColumn(
-        columnName: 'Title',
-        onBuild: (row) => Text(row.title),
-      ),
+      TableColumn(columnName: 'Title', onBuild: (row) => Text(row.title)),
       TableColumn(
         columnName: 'Client',
-        onBuild: (row) => ProjectClientCell(
-          row: row,
-          now: now,
-          timeZone: timeZone,
-        ),
+        onBuild: (row) =>
+            ProjectClientCell(row: row, now: now, timeZone: timeZone),
       ),
       if (!compact)
         TableColumn(

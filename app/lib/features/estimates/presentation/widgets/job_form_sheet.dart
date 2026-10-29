@@ -8,6 +8,7 @@ import 'package:app/core/widgets/confirm_dialog.dart';
 import 'package:app/features/estimates/domain/job.dart';
 import 'package:app/features/estimates/domain/job_type.dart';
 import 'package:app/features/estimates/presentation/controllers/job_form.dart';
+import 'package:app/features/estimates/presentation/controllers/project_jobs.dart';
 
 Future<bool> showJobFormSheet(
   BuildContext context, {
@@ -50,7 +51,10 @@ class _JobFormSheetState extends ConsumerState<JobFormSheet> {
   }
 
   JobFormController get _form => ref.read(
-    jobFormControllerProvider(projectId: widget.projectId, job: widget.job).notifier,
+    jobFormControllerProvider(
+      projectId: widget.projectId,
+      job: widget.job,
+    ).notifier,
   );
 
   Future<void> _cancel() async {
@@ -122,6 +126,16 @@ class _JobFormSheetState extends ConsumerState<JobFormSheet> {
             ),
             onChanged: _form.setDescription,
           ),
+          _AlternateOptionFields(
+            projectId: widget.projectId,
+            editingJobId: widget.job?.id,
+            isAlternate: form.isAlternate,
+            alternateOfJobId: form.alternateOfJobId,
+            errorText: form.alternateOfJobIdError,
+            enabled: !form.isSubmitting,
+            onIsAlternateChanged: _form.setIsAlternate,
+            onAlternateOfJobIdChanged: _form.setAlternateOfJobId,
+          ),
           if (form.errorMessage != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -131,6 +145,76 @@ class _JobFormSheetState extends ConsumerState<JobFormSheet> {
           ],
         ],
       ),
+    );
+  }
+}
+
+class _AlternateOptionFields extends ConsumerWidget {
+  const _AlternateOptionFields({
+    required this.projectId,
+    required this.editingJobId,
+    required this.isAlternate,
+    required this.alternateOfJobId,
+    required this.enabled,
+    required this.onIsAlternateChanged,
+    required this.onAlternateOfJobIdChanged,
+    this.errorText,
+  });
+
+  final String projectId;
+  final String? editingJobId;
+  final bool isAlternate;
+  final String? alternateOfJobId;
+  final String? errorText;
+  final bool enabled;
+  final ValueChanged<bool> onIsAlternateChanged;
+  final ValueChanged<String?> onAlternateOfJobIdChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final jobs = ref.watch(projectJobsProvider(projectId)).value ?? [];
+    final isBaseForOthers = jobs.any(
+      (row) => row.job.alternateOfJobId == editingJobId && editingJobId != null,
+    );
+    final bases = [
+      for (final row in jobs)
+        if (!row.job.isAlternate && row.job.id != editingJobId) row.job,
+    ];
+    if (isBaseForOthers || bases.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 8),
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('This is an alternate option'),
+          subtitle: const Text(
+            'Do not add this job to the default total. Pick the job it replaces.',
+          ),
+          value: isAlternate,
+          onChanged: enabled
+              ? (value) => onIsAlternateChanged(value ?? false)
+              : null,
+        ),
+        if (isAlternate) ...[
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            initialValue: bases.any((job) => job.id == alternateOfJobId)
+                ? alternateOfJobId
+                : null,
+            decoration: InputDecoration(
+              labelText: 'Replaces',
+              errorText: errorText,
+            ),
+            items: [
+              for (final job in bases)
+                DropdownMenuItem(value: job.id, child: Text(job.title)),
+            ],
+            onChanged: enabled ? onAlternateOfJobIdChanged : null,
+          ),
+        ],
+      ],
     );
   }
 }
@@ -164,7 +248,8 @@ class _JobTypeField extends StatelessWidget {
           emptySelectionAllowed: true,
           showSelectedIcon: false,
           onSelectionChanged: enabled
-              ? (selected) => onChanged(selected.isEmpty ? null : selected.first)
+              ? (selected) =>
+                    onChanged(selected.isEmpty ? null : selected.first)
               : null,
         ),
         if (errorText != null) ...[

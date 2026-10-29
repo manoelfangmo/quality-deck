@@ -36,6 +36,17 @@ abstract final class EstimateValidators {
     return null;
   }
 
+  static String? alternateOfJobId({
+    required bool isAlternate,
+    String? alternateOfJobId,
+  }) {
+    if (!isAlternate) return null;
+    if (alternateOfJobId == null || alternateOfJobId.isEmpty) {
+      return 'Pick the job this option replaces.';
+    }
+    return null;
+  }
+
   static String? lineName(String? value) {
     final trimmed = value?.trim() ?? '';
     if (trimmed.isEmpty || trimmed.length > maxLineNameLength) {

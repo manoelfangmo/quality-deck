@@ -58,7 +58,7 @@ final class JobFormControllerProvider
   }
 }
 
-String _$jobFormControllerHash() => r'e9b1e156a4b70bd7e8c218302de0047c6226dc9c';
+String _$jobFormControllerHash() => r'54dfeed6b35bd8ad63e33c05f7f7f8d471133b2a';
 
 final class JobFormControllerFamily extends $Family
     with

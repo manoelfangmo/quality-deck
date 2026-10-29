@@ -39,9 +39,11 @@ class ProjectTotalCard extends ConsumerWidget {
             ),
         ];
         final totals = projectTotals(visible, row.overhead);
+        final packages = packageTotals(visible, row.overhead);
         return _TotalCard(
           row: row,
           totals: totals,
+          packages: packages,
           readOnly: readOnly,
         );
       },
@@ -53,12 +55,16 @@ class _TotalCard extends ConsumerWidget {
   const _TotalCard({
     required this.row,
     required this.totals,
+    required this.packages,
     required this.readOnly,
   });
 
   final ProjectRow row;
   final ProjectTotals totals;
+  final List<PackageTotal> packages;
   final bool readOnly;
+
+  bool get _hasAlternates => packages.length > 1;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -74,33 +80,63 @@ class _TotalCard extends ConsumerWidget {
             const SizedBox(height: 12),
             for (final job in totals.jobs)
               _Line(
-                label: job.job.numberedTitle,
+                label: job.job.isAlternate
+                    ? '${job.job.numberedTitle} (option)'
+                    : job.job.numberedTitle,
                 amount: job.total.format(),
               ),
             const Divider(),
-            _Line(label: 'Subtotal', amount: totals.subtotal.format()),
-            if (totals.hasOverhead)
-              InkWell(
-                onTap: () => _openOverhead(context, ref),
-                child: _Line(
-                  label: 'Overhead (${totals.overhead!.format()})',
-                  amount: totals.overheadCents!.format(),
+            if (!_hasAlternates) ...[
+              _Line(label: 'Subtotal', amount: totals.subtotal.format()),
+              if (totals.hasOverhead)
+                InkWell(
+                  onTap: () => _openOverhead(context, ref),
+                  child: _Line(
+                    label: 'Overhead (${totals.overhead!.format()})',
+                    amount: totals.overheadCents!.format(),
+                  ),
+                )
+              else if (!readOnly)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () => _openOverhead(context, ref),
+                    child: const Text('+ Add overhead'),
+                  ),
                 ),
-              )
-            else if (!readOnly)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  onPressed: () => _openOverhead(context, ref),
-                  child: const Text('+ Add overhead'),
-                ),
+              const SizedBox(height: 8),
+              _Line(
+                label: 'Total',
+                amount: totals.total.format(),
+                emphasized: true,
               ),
-            const SizedBox(height: 8),
-            _Line(
-              label: 'Total',
-              amount: totals.total.format(),
-              emphasized: true,
-            ),
+            ] else ...[
+              if (!readOnly && !totals.hasOverhead)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () => _openOverhead(context, ref),
+                    child: const Text('+ Add overhead'),
+                  ),
+                ),
+              if (totals.hasOverhead)
+                InkWell(
+                  onTap: () => _openOverhead(context, ref),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      'Includes overhead (${totals.overhead!.format()})',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ),
+              for (final package in packages)
+                _Line(
+                  label: package.label,
+                  amount: package.total.format(),
+                  emphasized: true,
+                ),
+            ],
           ],
         ),
       ),

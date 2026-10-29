@@ -9,6 +9,7 @@ abstract final class JobsTable {
   static const laborHours = 'labor_hours';
   static const laborRateCents = 'labor_rate_cents';
   static const laborTotalCents = 'labor_total_cents';
+  static const alternateOfJobId = 'alternate_of_job_id';
   static const createdBy = 'created_by';
   static const createdAt = 'created_at';
   static const updatedAt = 'updated_at';

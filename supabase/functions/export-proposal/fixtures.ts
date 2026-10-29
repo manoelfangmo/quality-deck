@@ -81,6 +81,7 @@ export const typicalProject = project({
       laborHours: null,
       laborRateCents: null,
       createdAt: "2026-10-01T00:00:00Z",
+      alternateOfJobId: null,
       lineItems: [
         line("Decking recoat", "278", 800, { position: 0 }),
         line("Railing repairs", "1", 700, { pricingType: "fixed", position: 1 }),
@@ -115,6 +116,7 @@ export const typicalProject = project({
       laborHours: "4",
       laborRateCents: 7500,
       createdAt: "2026-10-01T00:00:01Z",
+      alternateOfJobId: null,
       lineItems: [
         line("Stair coating", "40", 900, { position: 0 }),
         line("Custom trim", "12", 1500, {
@@ -163,6 +165,7 @@ export const longLinesProject = project({
       laborHours: null,
       laborRateCents: null,
       createdAt: "2026-10-01T00:00:00Z",
+      alternateOfJobId: null,
       lineItems: Array.from({ length: 25 }, (_, i) =>
         line(`Line ${i + 1}`, "10", 1200 + i, { position: i })
       ),
@@ -183,6 +186,7 @@ export const threeJobsNoPhotos = project({
     laborHours: null,
     laborRateCents: null,
     createdAt: `2026-10-0${n}T00:00:00Z`,
+    alternateOfJobId: null,
     lineItems: [line(`Work ${n}`, "1", 100000 * n, { pricingType: "fixed" })],
     photos: [],
   })),
@@ -211,11 +215,71 @@ export const specialCharsProject = project({
       laborHours: null,
       laborRateCents: null,
       createdAt: "2026-10-01T00:00:00Z",
+      alternateOfJobId: null,
       lineItems: [
         line('Custom cap "A" & fascia <B>', "1", 50000, {
           pricingType: "fixed",
           isCustom: true,
           description: "Smith & Sons <notes>",
+        }),
+      ],
+      photos: [],
+    },
+  ],
+});
+
+export const optionProject = project({
+  title: "Deck Resurfacing & Reconfiguration Options",
+  siteStreet: "16204 Cannfield Dr",
+  siteCity: "Laurel",
+  siteState: "MD",
+  siteZip: "20707",
+  client: {
+    fullName: "LaRosa Arroyo",
+    email: "larosa@example.test",
+    phone: "301-555-0101",
+    street: "16204 Cannfield Dr",
+    city: "Laurel",
+    state: "MD",
+    zip: "20707",
+  },
+  jobs: [
+    {
+      id: "job-option-1",
+      title: "OPTION 1 - EXISTING DECK RESURFACE & STRUCTURAL UPGRADE",
+      jobType: "deck",
+      description: "KEEP EXISTING LAYOUT",
+      exclusions: null,
+      timeframe: "1-2 Weeks",
+      laborHours: null,
+      laborRateCents: null,
+      createdAt: "2026-09-20T00:00:00Z",
+      alternateOfJobId: null,
+      lineItems: [
+        line("Wood option #1 pressure-treated wood", "1", 1724800, {
+          pricingType: "fixed",
+          description:
+            "New #1 PT wood decking, railing, and stair components in areas being resurfaced",
+        }),
+      ],
+      photos: [],
+    },
+    {
+      id: "job-option-2",
+      title: "OPTION 2 - DECK RECONFIGURATION & LOWER DECK ADDITION",
+      jobType: "deck",
+      description: "NEW LAYOUT WITH LOWER DECK",
+      exclusions: null,
+      timeframe: "1-2 Weeks",
+      laborHours: null,
+      laborRateCents: null,
+      createdAt: "2026-09-20T00:00:01Z",
+      alternateOfJobId: "job-option-1",
+      lineItems: [
+        line("Wood option - #1 pressure-treated wood", "1", 2938200, {
+          pricingType: "fixed",
+          description:
+            "New #1 PT wood decking, railing, stairs, and trim",
         }),
       ],
       photos: [],

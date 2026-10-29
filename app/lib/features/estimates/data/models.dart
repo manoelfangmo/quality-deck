@@ -16,18 +16,21 @@ class CreateJobCommand {
     required this.title,
     required this.jobType,
     this.description,
+    this.alternateOfJobId,
   });
 
   final String projectId;
   final String title;
   final JobType jobType;
   final String? description;
+  final String? alternateOfJobId;
 
   Map<String, dynamic> toJson() => {
     JobsTable.projectId: projectId,
     JobsTable.title: title.trim(),
     JobsTable.jobType: jobType.toDb(),
     JobsTable.description: _blankToNull(description),
+    JobsTable.alternateOfJobId: alternateOfJobId,
   };
 }
 
@@ -37,17 +40,20 @@ class UpdateJobCommand {
     required this.title,
     required this.jobType,
     this.description,
+    this.alternateOfJobId,
   });
 
   final String id;
   final String title;
   final JobType jobType;
   final String? description;
+  final String? alternateOfJobId;
 
   Map<String, dynamic> toJson() => {
     JobsTable.title: title.trim(),
     JobsTable.jobType: jobType.toDb(),
     JobsTable.description: _blankToNull(description),
+    JobsTable.alternateOfJobId: alternateOfJobId,
   };
 }
 

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app/core/domain/app_exception.dart';
 import 'package:app/core/utils/toasts.dart';
 import 'package:app/features/estimates/data/jobs_repository.dart';
+import 'package:app/features/estimates/domain/job.dart';
 import 'package:app/features/estimates/domain/job_with_lines.dart';
 import 'package:app/features/estimates/domain/line_item.dart';
 import 'package:app/features/estimates/presentation/controllers/line_removal.dart';
@@ -67,6 +68,11 @@ class JobCard extends ConsumerWidget {
                         visualDensity: VisualDensity.compact,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
+                      if (job.isAlternate)
+                        _AlternateChip(
+                          projectId: projectId,
+                          alternateOfJobId: job.alternateOfJobId!,
+                        ),
                     ],
                   ),
                 ),
@@ -207,6 +213,36 @@ List<LineItem> _visibleLines(
     for (final line in ordered)
       if (!hidden.contains(line.id)) line,
   ];
+}
+
+class _AlternateChip extends ConsumerWidget {
+  const _AlternateChip({
+    required this.projectId,
+    required this.alternateOfJobId,
+  });
+
+  final String projectId;
+  final String alternateOfJobId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final jobs = ref.watch(projectJobsProvider(projectId)).value;
+    Job? base;
+    if (jobs != null) {
+      for (final row in jobs) {
+        if (row.job.id == alternateOfJobId) {
+          base = row.job;
+          break;
+        }
+      }
+    }
+    if (base == null) return const SizedBox.shrink();
+    return Chip(
+      label: Text('Option for: ${base.title}'),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    );
+  }
 }
 
 class _ExpandableDescription extends StatefulWidget {
