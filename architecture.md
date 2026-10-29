@@ -13,7 +13,7 @@ Each product area is a **feature**. A feature owns its screens, its state, its b
 Inside a feature, code is split into four layers. A widget never talks to Supabase. A repository never builds UI.
 
 ```
-presentation   screens, widgets, and the state those widgets watch
+presentation   screens, widgets, view models, and the state those widgets watch
       │
       ▼
 application    coordinates more than one repository, or more than one step
@@ -61,6 +61,8 @@ supabase/
 
 Every feature uses the same four folders. A small feature can leave out `application/` when nothing needs to coordinate more than one repository. `settings` is `presentation/` only: it composes `business` widgets for members and invites, reads the calendar connection through `scheduling`'s repository, and signs out through `auth`'s.
 
+Inside `presentation/`, `models/` holds Freezed view models and form state, one type per file. `controllers/` holds the notifiers that update them. A view model is never declared in the controller file.
+
 `app/lib/core/domain/` is for types that more than one feature needs. `Address` is used by clients, projects and scheduling. `Money` and `PriceUnit` are used by pricing and estimates. `Length` is used by onsite and estimates. A type used by only one feature stays in that feature's `domain/`.
 
 ## One business, walled off
@@ -87,7 +89,9 @@ features/projects/
     ├── project_page.dart             # placeholder details (jobs come later)
     ├── routes.dart                   # ProjectRoute(projectId)
     ├── controllers/                  # table view, projectProvider, create form, archive
-    ├── models/
+    ├── models/                       # Freezed view models and form state, one type per file
+    │   ├── create_project_form_state.dart
+    │   └── edit_project_form_state.dart
     ├── validators/
     └── widgets/                      # create sheet, client picker, client+appointment cell
 ```
@@ -149,7 +153,7 @@ Future<List<ProjectRow>> fetchAll({required ProjectView view}) async {
 }
 ```
 
-`Project` is the domain type. `ProjectRow` is the presentation type: exactly what one row of the list draws. Domain types describe the business. Presentation models describe what one screen needs to render.
+`Project` is the domain type. `ProjectRow` is the shape of one `project_rows` result: title, client, appointment, site, and date, defined next to the repository in `data/models.dart`. Domain types describe the business. Presentation models describe what one screen needs to render and live in `presentation/models/` as Freezed classes.
 
 A project never stores the client's name, phone or email. Those are read through `project_rows`. The site address is the opposite: it is copied onto the project when the project is created and is the project's own from then on. If the client is later removed, the project stays and the name is marked "(removed)".
 
@@ -247,13 +251,15 @@ Notes autosave (ON-1). `NoteEditorController` holds the text and writes through 
 
 Measurements are entered in feet and inches and stored in inches. `Length` in `core/domain/` parses and formats `16' 6"`; the square-foot or linear-foot `quantity` is a generated column, and `Measurement.quantity` mirrors it for the live preview, as with line totals.
 
-Photos (ON-4) are resized in the browser before upload so they finish on a cell connection: longest edge 2048 px, JPEG quality 0.8. `PhotoUploadController` uploads several at once to the `project-photos` storage bucket under `{business_id}/{project_id}/{photo_id}.jpg`, reports progress per file, and inserts the `photos` row only after the upload succeeds. Deleting removes the row and the file through `PhotosRepository.delete`. Storage policies mirror the table's RLS on the path's first segment.
+Photos (ON-4) are resized in the browser before upload so they finish on a cell connection: longest edge 2048 px, JPEG quality 0.8. `JobPhotosController` uploads several at once to the `project-photos` storage bucket under `{business_id}/{project_id}/{photo_id}.jpg`, reports progress per file, and inserts the `photos` row only after the upload succeeds. Deleting removes the row and the file through `PhotosRepository.delete`. Storage policies mirror the table's RLS on the path's first segment.
+
+The gallery watches `JobPhotosView`: saved photos, pending uploads, signed URLs, and the "Uploading n of m" status. `PendingPhoto` is the in-flight tile (processing, uploading, or failed). Both are Freezed view models in `onsite/presentation/models/`; the notifier that updates them is `JobPhotosController` in `controllers/`.
 
 ## What each layer is allowed to do
 
 | Layer | Put it here | Leave it out |
 | --- | --- | --- |
-| `presentation/` | Widgets, route classes, form state, validators, UI-only models | Supabase calls, multi-step workflows |
+| `presentation/` | Widgets, route classes, validators, Freezed view models and form state in `models/` (one type per file), notifiers in `controllers/` | Supabase calls, multi-step workflows |
 | `application/` | Services that order repository calls or combine features | Widgets, `BuildContext` |
 | `data/` | Repositories, command objects, storage uploads, Edge Function invocations | UI state, navigation |
 | `domain/` | Entities, value objects, pure rules (`LineItem.total`, `suggestedTitle`) | Flutter, Supabase, Riverpod |
@@ -339,6 +345,16 @@ Two Riverpod behaviours trip people up in tests:
 
 Pure rules get plain unit tests with no container: `LineItem.total`, `Length.parse`, `suggestedTitle`, and the start-status rule for create-from-visit.
 
+## Presentation models
+
+Types that describe what a screen draws live in `presentation/models/`, one class per file, as Freezed classes. They are not domain entities and they are not command objects.
+
+Form drafts (`CreateProjectFormState`, `LineFormState`) hold field values and validation errors. View models (`JobPhotosView`, `PendingPhoto`) hold the data a widget needs to render, including derived helpers (`remaining`, `uploadStatus`).
+
+The notifier that mutates the model lives in `presentation/controllers/`. Do not declare a view model or form state in the same file as the controller.
+
+Command objects and SQL-view row types stay in `data/models.dart` next to the repository (`CreateProjectCommand`, `ProjectRow`).
+
 ## Domain models
 
 `Project`, `Job`, `LineItem` and the rest are Freezed classes with `fromJson`. Freezed gives you `copyWith`, equality, and exhaustive cases on the status enums.
@@ -366,11 +382,11 @@ Every screen must work in Safari on an iPhone with no sideways scrolling, and wi
 
 ## How a new feature should look
 
-1. Create `app/lib/features/<name>/domain/` with the entities. Use `@freezed` when the type is sent to or from JSON, or when the UI copies it. If another feature needs the type, put it in `app/lib/core/domain/` instead.
+1. Create `app/lib/features/<name>/domain/` with the entities. Use `@freezed` when the type is sent to or from JSON, or when the UI copies it. If another feature needs the type, put it in `app/lib/core/domain/` instead. View models and form drafts are not domain types: they go in `presentation/models/`.
 2. Create `data/<name>_repository.dart`. Take `SupabaseClient` in the constructor. Expose a `@riverpod` provider that reads `supabaseProvider`. Add a `Future` provider per read the UI needs. Add table and column constants to `app/lib/core/database/`.
 3. Add an `application/` service only when a user action needs more than one repository call or another feature's data.
 4. Build the page as a `ConsumerWidget` that composes smaller widgets. Each widget watches the provider it renders.
-5. Keep form drafts and view selections in a notifier under `presentation/controllers/`. Submit through the service or, for a single call, through the repository. Then `ref.invalidate` every provider that displayed the old value.
+5. Put view models and form drafts in `presentation/models/` as `@freezed` classes, one type per file. Keep the notifier that updates them in `presentation/controllers/`. Submit through the service or, for a single call, through the repository. Then `ref.invalidate` every provider that displayed the old value.
 6. Add a class in `presentation/routes.dart` for a page that takes arguments, and the path to `AppRoutes`. A new main tab means a shell branch in `go_router.dart` and a destination in `HomePage`.
 
 Features are built in this order, so each one only depends on what already exists:

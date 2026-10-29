@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import 'package:app/features/onsite/domain/job_photo.dart';
-import 'package:app/features/onsite/presentation/controllers/job_photos.dart';
+import 'package:app/features/onsite/presentation/models/pending_photo.dart';
 
 const photoTileMinSize = 44.0;
 

@@ -7,6 +7,7 @@ import 'package:app/features/onsite/data/photo_platform.dart';
 import 'package:app/features/onsite/domain/photo_kind.dart';
 import 'package:app/features/onsite/domain/picked_photo.dart';
 import 'package:app/features/onsite/presentation/controllers/job_photos.dart';
+import 'package:app/features/onsite/presentation/models/job_photos_view.dart';
 
 import '../../../../helpers/fixtures.dart';
 import '../../fakes.dart';

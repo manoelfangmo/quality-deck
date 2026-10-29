@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -14,137 +13,10 @@ import 'package:app/features/onsite/domain/job_photo.dart';
 import 'package:app/features/onsite/domain/job_photo_limits.dart';
 import 'package:app/features/onsite/domain/photo_kind.dart';
 import 'package:app/features/onsite/domain/picked_photo.dart';
+import 'package:app/features/onsite/presentation/models/job_photos_view.dart';
+import 'package:app/features/onsite/presentation/models/pending_photo.dart';
 
 part 'job_photos.g.dart';
-
-enum PendingPhotoStatus { processing, uploading, failed }
-
-class PendingPhoto {
-  const PendingPhoto({
-    required this.localId,
-    required this.kind,
-    required this.status,
-    this.preview,
-    this.compressed,
-    this.error,
-  });
-
-  final String localId;
-  final PhotoKind kind;
-  final PendingPhotoStatus status;
-  final Uint8List? preview;
-  final CompressedPhoto? compressed;
-  final String? error;
-
-  PendingPhoto copyWith({
-    PendingPhotoStatus? status,
-    Uint8List? preview,
-    CompressedPhoto? compressed,
-    String? error,
-    bool clearError = false,
-  }) {
-    return PendingPhoto(
-      localId: localId,
-      kind: kind,
-      status: status ?? this.status,
-      preview: preview ?? this.preview,
-      compressed: compressed ?? this.compressed,
-      error: clearError ? null : (error ?? this.error),
-    );
-  }
-}
-
-class JobPhotosView {
-  const JobPhotosView({
-    this.saved = const [],
-    this.urls = const {},
-    this.pending = const [],
-    this.notice,
-    this.cameraDenied = false,
-    this.deleteError,
-    this.loading = true,
-    this.batchSize = 0,
-    this.batchFinished = 0,
-  });
-
-  final List<JobPhoto> saved;
-  final Map<String, String> urls;
-  final List<PendingPhoto> pending;
-  final String? notice;
-  final bool cameraDenied;
-  final String? deleteError;
-  final bool loading;
-  final int batchSize;
-  final int batchFinished;
-
-  int savedCount(PhotoKind kind) =>
-      saved.where((photo) => photo.kind == kind).length;
-
-  int pendingCount(PhotoKind kind) => pending
-      .where(
-        (photo) =>
-            photo.kind == kind && photo.status != PendingPhotoStatus.failed,
-      )
-      .length;
-
-  int remaining(PhotoKind kind) =>
-      JobPhotoLimits.maxPerGallery - savedCount(kind) - pendingCount(kind);
-
-  bool get hasActiveUploads => pending.any(
-    (photo) =>
-        photo.status == PendingPhotoStatus.processing ||
-        photo.status == PendingPhotoStatus.uploading,
-  );
-
-  int get activeUploadCount => pending
-      .where(
-        (photo) =>
-            photo.status == PendingPhotoStatus.processing ||
-            photo.status == PendingPhotoStatus.uploading,
-      )
-      .length;
-
-  List<JobPhoto> savedOf(PhotoKind kind) =>
-      saved.where((photo) => photo.kind == kind).toList();
-
-  List<PendingPhoto> pendingOf(PhotoKind kind) =>
-      pending.where((photo) => photo.kind == kind).toList();
-
-  String? get uploadStatus {
-    if (!hasActiveUploads || batchSize <= 0) return null;
-    final current = (batchFinished + 1).clamp(1, batchSize);
-    return 'Uploading $current of $batchSize — keep this screen open.';
-  }
-
-  JobPhotosView copyWith({
-    List<JobPhoto>? saved,
-    Map<String, String>? urls,
-    List<PendingPhoto>? pending,
-    String? notice,
-    bool? cameraDenied,
-    String? deleteError,
-    bool? loading,
-    int? batchSize,
-    int? batchFinished,
-    bool clearNotice = false,
-    bool clearCameraDenied = false,
-    bool clearDeleteError = false,
-  }) {
-    return JobPhotosView(
-      saved: saved ?? this.saved,
-      urls: urls ?? this.urls,
-      pending: pending ?? this.pending,
-      notice: clearNotice ? null : (notice ?? this.notice),
-      cameraDenied: clearCameraDenied
-          ? false
-          : (cameraDenied ?? this.cameraDenied),
-      deleteError: clearDeleteError ? null : (deleteError ?? this.deleteError),
-      loading: loading ?? this.loading,
-      batchSize: batchSize ?? this.batchSize,
-      batchFinished: batchFinished ?? this.batchFinished,
-    );
-  }
-}
 
 @Riverpod(keepAlive: true)
 class PhotoUploadsInProgress extends _$PhotoUploadsInProgress {
@@ -202,7 +74,7 @@ class JobPhotosController extends _$JobPhotosController {
       _pick(kind, PhotoPickSource.library);
 
   Future<void> _pick(PhotoKind kind, PhotoPickSource source) async {
-    state = state.copyWith(clearNotice: true, clearCameraDenied: true);
+    state = state.copyWith(notice: null, cameraDenied: false);
     if (source == PhotoPickSource.camera) {
       final access = await ref.read(cameraPermissionProvider).check();
       if (access == CameraAccess.denied) {
@@ -289,7 +161,7 @@ class JobPhotosController extends _$JobPhotosController {
         status: PendingPhotoStatus.uploading,
         preview: compressed!.bytes,
         compressed: compressed,
-        clearError: true,
+        error: null,
       ),
     );
 
@@ -315,9 +187,7 @@ class JobPhotosController extends _$JobPhotosController {
             isCancelled: () => _cancelled.contains(localId),
           );
       if (!ref.mounted) return;
-      _removePending(localId);
-      state = state.copyWith(saved: [...state.saved, saved.photo]);
-      _finishBatchItem();
+      await _attachSaved(localId, saved.photo);
     } on CancelledUpload {
       _removePending(localId);
       _finishBatchItem();
@@ -344,10 +214,8 @@ class JobPhotosController extends _$JobPhotosController {
     _cancelled.remove(localId);
     _updatePending(
       localId,
-      (photo) => photo.copyWith(
-        status: PendingPhotoStatus.uploading,
-        clearError: true,
-      ),
+      (photo) =>
+          photo.copyWith(status: PendingPhotoStatus.uploading, error: null),
     );
     _syncLeaveGuard();
 
@@ -372,9 +240,7 @@ class JobPhotosController extends _$JobPhotosController {
             isCancelled: () => _cancelled.contains(localId),
           );
       if (!ref.mounted) return;
-      _removePending(localId);
-      state = state.copyWith(saved: [...state.saved, saved.photo]);
-      _finishBatchItem();
+      await _attachSaved(localId, saved.photo);
     } on CancelledUpload {
       _removePending(localId);
       _finishBatchItem();
@@ -407,7 +273,7 @@ class JobPhotosController extends _$JobPhotosController {
     _hiddenIds = {..._hiddenIds, photo.id};
     state = state.copyWith(
       saved: state.saved.where((row) => row.id != photo.id).toList(),
-      clearDeleteError: true,
+      deleteError: null,
     );
     try {
       await ref.read(deleteJobPhotoProvider).call(photo);
@@ -454,6 +320,22 @@ class JobPhotosController extends _$JobPhotosController {
     }
     state = state.copyWith(pending: failed);
     _syncLeaveGuard();
+  }
+
+  Future<void> _attachSaved(String localId, JobPhoto photo) async {
+    String? url;
+    try {
+      url = await ref
+          .read(photoStorageProvider)
+          .signedUrl(photo.storagePath, JobPhotoLimits.signedUrlTtl);
+    } catch (_) {}
+    if (!ref.mounted) return;
+    _removePending(localId);
+    state = state.copyWith(
+      saved: [...state.saved, photo],
+      urls: url == null ? state.urls : {...state.urls, photo.id: url},
+    );
+    _finishBatchItem();
   }
 
   void _fail(String localId, String message, {CompressedPhoto? compressed}) {
