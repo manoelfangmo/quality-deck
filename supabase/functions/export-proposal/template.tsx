@@ -1,6 +1,7 @@
 /** @jsxImportSource preact */
 
 import { render } from "preact-render-to-string";
+import { brandInitials, proposalCopy } from "./copy.ts";
 import { DOCUMENT_CSS, HEADER_CSS, PDF_PAGE_CSS } from "./css.ts";
 import { formatAddress, formatUsd } from "./data.ts";
 import type {
@@ -42,10 +43,12 @@ export function Letterhead({ letterhead }: { letterhead: LetterheadView }) {
           </div>
         ) : (
           <>
-            <div class="qd-mark">QD</div>
+            <div class="brand-mark">{brandInitials(letterhead.name)}</div>
             <div class="brand-text">
               <div class="brand-name">{letterhead.name}</div>
-              <div class="brand-sub">Design & Construction</div>
+              {proposalCopy.trade && (
+                <div class="brand-sub">{proposalCopy.trade}</div>
+              )}
             </div>
           </>
         )}
@@ -56,9 +59,16 @@ export function Letterhead({ letterhead }: { letterhead: LetterheadView }) {
         </div>
       )}
       <div class="tag-block">
-        <div class="slogan">
-          Built right.<br />Built to last.
-        </div>
+        {!letterhead.logoUrl && proposalCopy.sloganLines.length > 0 && (
+          <div class="slogan">
+            {proposalCopy.sloganLines.map((line, index) => (
+              <span key={line}>
+                {index > 0 && <br />}
+                {line}
+              </span>
+            ))}
+          </div>
+        )}
         {letterhead.tagline && <div class="tagline">{letterhead.tagline}</div>}
       </div>
     </header>
@@ -173,7 +183,7 @@ export function JobSection({
                 <ConceptImages images={job.conceptImages} />
               </div>
             )}
-            <div>
+            <div class="job-text">
               {intro && <p class="scope">{intro}</p>}
               <ScopeList items={job.lineItems} exclusions={job.exclusions} />
             </div>
@@ -232,7 +242,7 @@ export function Terms({
           <Icon d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 5v5l4 2-.7 1.2L11 13V7z" />
           <div>
             <h2>Pricing Validity</h2>
-            <p>Pricing valid for 30 days from proposal date.</p>
+            <p>{proposalCopy.validityBlurb}</p>
           </div>
         </div>
         <div class="term">
@@ -256,7 +266,7 @@ export function Terms({
               <h2>Project Timeframe</h2>
               <p>Estimated project timeframe:</p>
               {timeframes.map((item) => <p key={item}>{item}</p>)}
-              <p>weather depending*.</p>
+              <p>{proposalCopy.weatherNote}</p>
             </div>
           </div>
         )}
@@ -264,7 +274,7 @@ export function Terms({
           <Icon d="M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6zm0 17c-3.2-.6-6-4-6-8.2V7.4L12 5l6 2.4v3.4c0 4.2-2.8 7.6-6 8.2z" />
           <div>
             <h2>Payment Schedule</h2>
-            <p>1/3 deposit • 2/3 at project start • 3/3 upon completion</p>
+            <p>{proposalCopy.paymentSchedule}</p>
           </div>
         </div>
       </div>
@@ -370,7 +380,7 @@ export function ProposalDocument({
           {includeLetterhead && (
             <>
               <Letterhead letterhead={proposal.letterhead} />
-              <div class="gold-rule" />
+              <div class="accent-rule" />
             </>
           )}
           <div class="body">
@@ -431,7 +441,7 @@ export function renderProposalHeaderHtml(proposal: ProposalView): string {
     <div class="pdf-header">
       <style>{proposal.fontCss + HEADER_CSS}</style>
       <Letterhead letterhead={proposal.letterhead} />
-      <div class="gold-rule" />
+      <div class="accent-rule" />
     </div>,
   );
 }

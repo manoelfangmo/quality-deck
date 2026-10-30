@@ -1,4 +1,5 @@
 import { assert, assertEquals } from "./assert.ts";
+import { brandInitials } from "./copy.ts";
 import {
   longLinesProject,
   optionProject,
@@ -66,6 +67,20 @@ Deno.test("letterhead slogan and thank-you casing match the samples", () => {
   assert(html.includes("Built right."));
   assert(html.includes("Built to last."));
   assert(html.includes("FOR CONSIDERING"));
+  assert(html.includes("Pricing valid for 30 days from proposal date."));
+});
+
+Deno.test("letterhead mark uses business initials, not a hard-coded QD", () => {
+  assertEquals(brandInitials("Quality Deck"), "QD");
+  assertEquals(brandInitials("Quality Deck Inc"), "QD");
+  assertEquals(brandInitials("Acme Builders LLC"), "AB");
+  const html = renderProposalHtml(viewFor({
+    ...typicalProject,
+    business: { ...typicalProject.business, name: "Acme Builders" },
+  }));
+  assert(html.includes('class="brand-mark">AB<'));
+  assert(html.includes("Acme Builders"));
+  assert(!html.includes('class="qd-mark"'));
 });
 
 Deno.test("repeating header HTML includes the letterhead", () => {

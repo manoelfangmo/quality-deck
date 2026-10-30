@@ -4,7 +4,7 @@ Rebuilt from the attached samples (Leibel, LaRosa Arroyo, Nancy Duffy).
 
 ## Sections, in order
 
-1. **Letterhead** — white bar. Square QD lockup on the left with **QUALITY DECK** / **DESIGN & CONSTRUCTION** (hidden when a stored `logo_path` is used); condensed uppercase contact block in the center (street, city/state/zip, license, phone, email, website); **BUILT RIGHT. BUILT TO LAST.** and the tagline on the right. Repeats on every PDF page via the PDFShift header.
+1. **Letterhead** — white bar. Square initials from the business name on the left with the wordmark and trade line (hidden when a stored `logo_path` is used); condensed uppercase contact block in the center (street, city/state/zip, license, phone, email, website); slogan and tagline on the right. Repeats on every PDF page via the PDFShift header.
 2. **Bronze rule** — 9px `#64532b` bar under the letterhead.
 3. **Tagline** — `DECKS | PORCHES | OUTDOOR LIVING` under the slogan, hidden when `businesses.tagline` is empty.
 4. **Client and site block** — Project and Location on the left; Date and Attention on the right. Proposal number and 30-day validity are generated internally (filename and the Pricing Validity card) and are not printed here.
@@ -18,7 +18,7 @@ Rebuilt from the attached samples (Leibel, LaRosa Arroyo, Nancy Duffy).
 - **Page:** US Letter, white letterhead, ~0.5in inner inset. No navy bar and no gold sidebar.
 - **Colors:** bronze `#64532b` (table header, rule, price-box border, Thank You corner), cream `#efead8` (job title bars and price boxes), ink `#222`, white page. Prices are black, not gold.
 - **Fonts (embedded WOFF2):** Oswald (labels/headings), Source Sans 3 (body), Great Vibes (“Thank You”).
-- **Logo:** left square QD mark plus wordmark. A stored `logo_path` replaces the mark and wordmark.
+- **Logo:** left square initials mark plus wordmark. A stored `logo_path` replaces the mark, trade line, and slogan. Boilerplate copy (slogan, trade line, payment schedule, validity) lives in `copy.ts` so a later business can override it without editing the template.
 - **Prices:** `$12,450` when whole dollars; cents only when they are non-zero. Job price sits in the PRICE column; line items are listed as bullets in the description.
 
 ## Alternate jobs

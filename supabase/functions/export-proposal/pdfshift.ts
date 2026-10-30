@@ -1,3 +1,5 @@
+import { PAGE_TOP_MARGIN } from "./css.ts";
+
 export const PDFSHIFT_URL = "https://api.pdfshift.io/v3/convert/pdf";
 export const PDFSHIFT_TIMEOUT_MS = 45_000;
 
@@ -65,7 +67,7 @@ async function convertOnce(
         sandbox: request.sandbox,
         format: "Letter",
         margin: {
-          top: request.headerHtml ? "1.35in" : "0px",
+          top: request.headerHtml ? PAGE_TOP_MARGIN : "0px",
           right: "0px",
           bottom: "0px",
           left: "0px",

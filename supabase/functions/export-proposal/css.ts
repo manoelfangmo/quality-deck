@@ -3,10 +3,14 @@ const CREAM = "#efead8";
 const INK = "#222";
 const MUTED = "#5c5648";
 
+/** Repeating letterhead slot. PDFShift `margin.top` and `@page` both read this. */
+export const PAGE_TOP_MARGIN = "1.35in";
+export const HEADER_BAND = "1.18in";
+
 const LETTERHEAD_CSS = `
 .letterhead {
   display: grid;
-  grid-template-columns: 2.45in 1fr 2.15in;
+  grid-template-columns: minmax(0, 2.6in) minmax(0, 1fr) minmax(0, 2.2in);
   align-items: center;
   column-gap: 16px;
   padding: 10px 36px 8px;
@@ -19,7 +23,7 @@ const LETTERHEAD_CSS = `
   gap: 10px;
   min-width: 0;
 }
-.qd-mark {
+.brand-mark {
   width: 70px;
   height: 70px;
   flex: 0 0 70px;
@@ -44,6 +48,7 @@ const LETTERHEAD_CSS = `
   letter-spacing: 0.04em;
   text-transform: uppercase;
   line-height: 1.05;
+  overflow-wrap: break-word;
 }
 .brand-sub {
   font-family: 'Oswald', 'Arial Narrow', sans-serif;
@@ -55,12 +60,14 @@ const LETTERHEAD_CSS = `
   margin-top: 4px;
 }
 .logo {
-  width: 210px;
+  width: min(210px, 100%);
   height: 70px;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 .logo img {
-  width: 210px;
+  width: 100%;
+  max-width: 210px;
   height: 70px;
   display: block;
   object-fit: contain;
@@ -75,6 +82,8 @@ const LETTERHEAD_CSS = `
   line-height: 1.35;
   text-transform: uppercase;
   color: ${INK};
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 .tag-block {
   text-align: right;
@@ -102,7 +111,7 @@ const LETTERHEAD_CSS = `
   text-transform: uppercase;
   padding: 6px 0 0;
 }
-.gold-rule {
+.accent-rule {
   height: 9px;
   background: ${BRONZE};
 }
@@ -151,7 +160,8 @@ html, body {
 }
 .pdf-header {
   width: 100%;
-  height: 1.18in;
+  min-height: ${HEADER_BAND};
+  max-height: ${PAGE_TOP_MARGIN};
   overflow: hidden;
   background: transparent;
 }
@@ -173,7 +183,7 @@ html, body {
   widows: 3;
 }
 p, h1, h2, h3, li, td, th, address {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .page {
   position: relative;
@@ -183,8 +193,8 @@ p, h1, h2, h3, li, td, th, address {
   padding-bottom: 18px;
 }
 .page-pdf {
-  min-height: 11in;
-  padding-top: 1.28in;
+  min-height: calc(11in - ${PAGE_TOP_MARGIN});
+  padding-top: 0;
   padding-bottom: 18px;
 }
 ${LETTERHEAD_CSS}
@@ -296,6 +306,7 @@ ${LETTERHEAD_CSS}
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   background: ${CREAM};
   padding: 7px 12px;
@@ -308,6 +319,8 @@ ${LETTERHEAD_CSS}
   letter-spacing: 0.02em;
   color: ${INK};
   margin: 0;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 .job-kicker {
   font-family: 'Oswald', 'Arial Narrow', sans-serif;
@@ -316,23 +329,29 @@ ${LETTERHEAD_CSS}
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: ${BRONZE};
-  white-space: nowrap;
+  text-align: right;
 }
 .job-body {
   padding: 12px 12px 16px;
 }
 .job-copy {
   display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   align-items: flex-start;
 }
+.job-text {
+  flex: 1 1 3in;
+  min-width: 0;
+}
 .job-photos {
-  flex: 0 0 2.05in;
-  width: 2.05in;
+  flex: 1 1 1.6in;
+  max-width: 2.05in;
 }
 .job-photos img {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
   margin: 0 0 8px;
   background: #eee;
@@ -401,7 +420,7 @@ ${LETTERHEAD_CSS}
 }
 .closing-grid {
   display: grid;
-  grid-template-columns: 2.35in 1fr;
+  grid-template-columns: minmax(0, 2.35in) minmax(0, 1fr);
   gap: 8px 16px;
   align-items: start;
   padding-right: 2.15in;
@@ -495,9 +514,10 @@ ${THANK_YOU_CSS}
 export const PDF_PAGE_CSS = `
 @page {
   size: Letter;
-  margin: 1.35in 0 0 0;
+  margin: ${PAGE_TOP_MARGIN} 0 0 0;
 }
 .page-pdf {
+  min-height: calc(11in - ${PAGE_TOP_MARGIN});
   padding-top: 0;
 }
 `;
