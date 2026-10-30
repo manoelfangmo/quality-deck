@@ -1,0 +1,26 @@
+import 'package:mockito/annotations.dart';
+
+import 'package:app/features/auth/data/auth_repository.dart';
+import 'package:app/features/business/data/business_repository.dart';
+import 'package:app/features/business/data/invites_repository.dart';
+import 'package:app/features/clients/data/clients_repository.dart';
+import 'package:app/features/estimates/data/jobs_repository.dart';
+import 'package:app/features/estimates/data/line_items_repository.dart';
+import 'package:app/features/pricing/data/price_items_repository.dart';
+import 'package:app/features/pricing/data/pricing_repository.dart';
+import 'package:app/features/projects/data/projects_repository.dart';
+import 'package:app/features/scheduling/data/appointments_repository.dart';
+
+@GenerateNiceMocks([
+  MockSpec<AuthRepository>(),
+  MockSpec<BusinessRepository>(),
+  MockSpec<InvitesRepository>(),
+  MockSpec<ClientsRepository>(),
+  MockSpec<AppointmentsRepository>(),
+  MockSpec<PricingRepository>(),
+  MockSpec<PriceItemsRepository>(),
+  MockSpec<ProjectsRepository>(),
+  MockSpec<JobsRepository>(),
+  MockSpec<LineItemsRepository>(),
+])
+export 'mocks.mocks.dart';

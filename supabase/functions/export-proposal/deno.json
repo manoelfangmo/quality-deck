@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  },
+  "imports": {
+    "preact": "npm:preact@10.26.9",
+    "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",
+    "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime",
+    "preact-render-to-string": "npm:preact-render-to-string@6.5.13",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.86.0",
+    "@supabase/functions-js": "jsr:@supabase/functions-js@2.4.9"
+  }
+}

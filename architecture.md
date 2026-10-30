@@ -13,7 +13,7 @@ Each product area is a **feature**. A feature owns its screens, its state, its b
 Inside a feature, code is split into four layers. A widget never talks to Supabase. A repository never builds UI.
 
 ```
-presentation   screens, widgets, and the state those widgets watch
+presentation   screens, widgets, view models, and the state those widgets watch
       │
       ▼
 application    coordinates more than one repository, or more than one step
@@ -41,125 +41,123 @@ app/lib/
 │   ├── utils/                # providers.dart (Supabase client, clock), extensions, toasts, autosave debouncer
 │   └── widgets/              # buttons, search field, tap-to-call/email/maps, empty/error states, reorder list
 └── features/
-    ├── auth/                 # AU: sign-in, sign-out, password reset
+    ├── auth/                 # AU: sign-in, sign-up, sign-out
+    ├── business/             # AU: onboarding, members, invites
     ├── clients/              # CL: client list, search, client page, duplicate check
     ├── projects/             # PJ, JB: pipeline, project page, jobs, status history
     ├── scheduling/           # SC: appointments, Google Calendar connection and sync state
     ├── onsite/               # ON: notes, measurements, deck details, photos
     ├── pricing/              # PR: price categories and items
     ├── estimates/            # ES: line items and totals on a job
-    └── settings/             # calendar connection status, sign-out
+    └── settings/             # members, invites, calendar connection, sign-out
 
 supabase/
 ├── config.toml
 ├── migrations/               # schema, RLS policies, triggers, RPC functions
 ├── functions/
 │   └── calendar-sync/        # the one Edge Function: talks to Google Calendar
-└── seed.sql                  # one business, one owner, a handful of clients and price items
+└── seed.sql                  # Quality Deck + Other Co, owners/members, invite codes
 ```
 
-Every feature uses the same four folders. A small feature can leave out `application/` when nothing needs to coordinate more than one repository. `settings` is `presentation/` only: it reads the calendar connection through `scheduling`'s repository and signs out through `auth`'s.
+Every feature uses the same four folders. A small feature can leave out `application/` when nothing needs to coordinate more than one repository. `settings` is `presentation/` only: it composes `business` widgets for members and invites, reads the calendar connection through `scheduling`'s repository, and signs out through `auth`'s.
+
+Inside `presentation/`, `models/` holds Freezed view models and form state, one type per file. `controllers/` holds the notifiers that update them. A view model is never declared in the controller file.
 
 `app/lib/core/domain/` is for types that more than one feature needs. `Address` is used by clients, projects and scheduling. `Money` and `PriceUnit` are used by pricing and estimates. `Length` is used by onsite and estimates. A type used by only one feature stays in that feature's `domain/`.
 
 ## One business, walled off
 
-Every table carries `business_id`, and every RLS policy limits rows to the signed-in user's business through one SQL helper, `current_business_id()`, which reads `users.business_id` for `auth.uid()`. Part 1 has one business (Field Notes) and one user (Moises), but nothing in Dart assumes that.
+Every table carries `business_id`, and every RLS policy limits rows to the signed-in user's business through one SQL helper, `current_business_id()`, which reads `memberships.business_id` for `auth.uid()`. `users` holds only who someone is; `memberships` holds which business they belong to and their role. A user without a membership row is signed up but not in a business yet. Part 1 is one business per user (`memberships.user_id` is the primary key). Nothing in Dart assumes a particular business or that a user always has one.
 
 The app never sends `business_id`. Inserts leave it out and a column default of `current_business_id()` fills it in; RPCs read it from the caller. Repositories never filter by it either: RLS already did. If a query seems to need `.eq('business_id', …)`, the policy is wrong.
 
-`AppUser` in `core/domain/` is the signed-in user with their business and role. `currentUserProvider` in `auth` loads it once after sign-in and is `keepAlive`.
+`AppUser` in `core/domain/` is the signed-in user with an optional `Membership` (business id and role). `currentUserProvider` in `auth` loads it after sign-in, is `keepAlive`, and reloads when the tab becomes visible and every 5 minutes so a removed member is signed out promptly.
 
 ## Projects, folder by folder
 
 ```
 features/projects/
 ├── domain/
-│   ├── client_ref.dart               # the client fields a project shows (name, phone, email)
-│   ├── project.dart                  # project record: title, site address, status, archived_at
-│   ├── project_status.dart           # lead / onsite_scheduled / onsite_done / proposal_sent / won / lost
-│   ├── project_status_event.dart     # one row of status history (PJ-3)
-│   ├── job.dart                      # one priced scope inside a project
-│   ├── job_type.dart                 # deck / patio / hardscaping
-│   ├── job_status.dart               # proposed / accepted / declined / in_progress / complete
-│   └── suggested_title.dart          # "Melgar – Deck – 123 Oak St"
+│   ├── project.dart                  # id, clientId, title, siteAddress, archivedAt?, createdAt
+│   ├── project_view.dart             # Active | Archived
+│   └── suggested_title.dart          # "Melgar – 123 Oak St"
 ├── data/
-│   ├── projects_repository.dart      # projects, status history, archive / restore
-│   ├── jobs_repository.dart          # jobs, reorder, accept / decline
-│   └── models.dart                   # CreateProjectCommand, CreateJobCommand, …
-├── application/
-│   └── project_service.dart          # create a project (with first job, optional visit); create from visit
+│   ├── projects_repository.dart      # fetchPage / fetchAll, fetchOne, create, archive, unarchive
+│   └── models.dart                   # CreateProjectCommand, ProjectRow, ProjectPage
 └── presentation/
-    ├── projects_page.dart            # home tab: this week's appointments, then the pipeline
-    ├── project_page.dart             # client card, appointments, onsite, jobs
+    ├── projects_page.dart            # home tab: Active | Archived table
+    ├── project_page.dart             # placeholder details (jobs come later)
     ├── routes.dart                   # ProjectRoute(projectId)
-    ├── controllers/                  # Riverpod notifiers and combined providers
-    ├── models/                       # state that exists only for the UI
+    ├── controllers/                  # table view, projectProvider, create form, archive
+    ├── models/                       # Freezed view models and form state, one type per file
+    │   ├── create_project_form_state.dart
+    │   └── edit_project_form_state.dart
     ├── validators/
-    └── widgets/
+    └── widgets/                      # create sheet, client picker, client+appointment cell
 ```
 
-Open `projects_page.dart` first. It is the home screen (PJ-4). The top section watches `upcomingAppointmentsProvider` from `scheduling`; the pipeline below it watches `pipelineProvider`. The page itself fetches nothing.
+Open `projects_page.dart` first. It is the home screen (PJ-4). A segmented control switches **Active** and **Archived**. The table watches `projectRowsProvider(view)`. Creating a project, or tapping a row, pushes `ProjectRoute(id)` onto the Projects branch.
 
-## Reading data: the pipeline
+Story decisions in this slice:
 
-The pipeline needs projects filtered by status, job type and a search term, each row with its client, job count and next appointment. The filters come from UI state. The rows come from the repository. A controller combines them.
+- **PJ-1:** no status at creation and no visit booked in the same step; jobs are added after creation (JB-1 is not enforced here).
+- **PJ-2** ("create project from this visit") is dropped; appointments belong to clients.
+- **PJ-3** (statuses and status time stamps) is postponed. The 30-day results review relied on those time stamps, so it needs another measure or PJ-3 comes back before Part 2.
+- **PJ-4:** rows show title, client with the client's appointment, site and date; no status or job count for now.
+- **PJ-6:** archive with an Active / Archived switch; no delete.
+
+## Reading data: the projects table
+
+The table needs the business's projects for one view (active or archived), each row with its client and that client's appointment. The view comes from UI state. The rows come from the repository.
 
 ```
-PipelineList
-  watches pipelineProvider
-    watches pipelineFilterControllerProvider    → status, job type, search text (UI state)
-    watches projectRowsProvider(filter)         → ProjectsRepository.fetchPipeline
-  builds List<ProjectRow>
+ProjectsPage
+  watches projectsTableControllerProvider   → Active | Archived (and page)
+  watches projectRowsProvider(view)         → ProjectsRepository.fetchAll
+  builds PaginatedTableComponent<ProjectRow>
 ```
 
-```dart
-@riverpod
-Future<List<ProjectRow>> pipeline(Ref ref) async {
-  final filter = ref.watch(pipelineFilterControllerProvider);
-  return ref.watch(projectRowsProvider(filter.toQuery()).future);
-}
-```
+`projectRowsProvider` is a **family** provider: each view is its own cache, so flipping between Active and Archived does not refetch the other. `projectRowsPageProvider((view, page))` is the server-paged read used by tests. The existing `PaginatedTableComponent` pages in memory and has no page-fetch callback, so the screen loads the current view with `fetchAll` and lets the table slice it.
 
-`projectRowsProvider` is a **family** provider: each distinct filter is its own cache, so flipping between "Won" and "All" does not refetch. The widget handles loading, data, and error in one place:
+The widget handles loading, data, and error in one place:
 
 ```dart
 Widget build(BuildContext context, WidgetRef ref) {
-  final rows = ref.watch(pipelineProvider);
+  final view = ref.watch(projectsTableControllerProvider).view;
+  final rows = ref.watch(projectRowsProvider(view));
 
   return rows.when(
-    data: (rows) => _buildList(context, rows),
+    data: (rows) => _buildTable(context, rows),
     loading: () => const Center(child: CircularProgressIndicator()),
     error: (err, stack) => ErrorRetry(
-      onRetry: () => ref.invalidate(projectRowsProvider),
+      onRetry: () => ref.invalidate(projectRowsProvider(view)),
     ),
   );
 }
 ```
 
-The repository is the only class that knows table names, columns, and view names. The pipeline reads the `project_rows` view, which joins the client, counts jobs and picks the next scheduled appointment in SQL, so the list is one query:
+The repository is the only class that knows table names, columns, and view names. The table reads the `project_rows` view, which joins the client and the client's one active appointment in SQL:
 
 ```dart
-Future<List<ProjectRow>> fetchPipeline(PipelineQuery query) async {
-  var q = _supabase
-      .from(ProjectRowsView.name)
-      .select()
-      .isFilter(ProjectRowsView.archivedAt, null);
-
-  if (query.status != null) q = q.eq(ProjectRowsView.status, query.status!.toDb());
-  if (query.jobType != null) q = q.contains(ProjectRowsView.jobTypes, [query.jobType!.toDb()]);
-  if (query.search.isNotEmpty) q = q.ilike(ProjectRowsView.searchText, '%${query.search}%');
-
-  final rows = await q.order(ProjectRowsView.statusChangedAt, ascending: false);
+Future<List<ProjectRow>> fetchAll({required ProjectView view}) async {
+  var q = _supabase.from(ProjectRowsView.name).select();
+  q = view == ProjectView.active
+      ? q.isFilter(ProjectRowsView.archivedAt, null)
+      : q.not(ProjectRowsView.archivedAt, 'is', null);
+  final rows = await q
+      .order(view == ProjectView.active
+          ? ProjectRowsView.createdAt
+          : ProjectRowsView.archivedAt, ascending: false)
+      .order(ProjectRowsView.id);
   return rows.map(ProjectRow.fromJson).toList();
 }
 ```
 
-`Project` is the domain type. `ProjectRow` is the presentation type: exactly what one row of the list draws. Domain types describe the business. Presentation models describe what one screen needs to render.
+`Project` is the domain type. `ProjectRow` is the shape of one `project_rows` result: title, client, appointment, site, and date, defined next to the repository in `data/models.dart`. Domain types describe the business. Presentation models describe what one screen needs to render and live in `presentation/models/` as Freezed classes.
 
-A project never stores the client's name, phone or email. `Project.client` is a `ClientRef` read through a join (`select('*, client:clients(id, full_name, phone, email)')`), so a fix on the client page shows on every project at once (CL-3, PJ-1). The site address is the opposite: it is copied onto the project when the project is created and is the project's own from then on.
+A project never stores the client's name, phone or email. Those are read through `project_rows`. The site address is the opposite: it is copied onto the project when the project is created and is the project's own from then on. If the client is later removed, the project stays and the name is marked "(removed)".
 
-A simpler read skips the controller. The client page watches `clientProjectsProvider(clientId)`, which calls `ProjectsRepository.fetchForClient` directly. Use a controller when the widget needs data assembled from more than one provider. Use the repository provider when one query is the whole story.
+The appointment is the client's, display only. Two projects for the same client show the same appointment. Nothing on the Projects tab creates, edits, or removes it.
 
 ## Writing data: two patterns
 
@@ -170,36 +168,24 @@ Archiving a project is a single update. The project page's menu calls the reposi
 ```dart
 await ref.read(projectsRepositoryProvider).archive(projectId);
 ref.invalidate(projectRowsProvider);
-ref.invalidate(clientProjectsProvider);
+ref.invalidate(projectProvider(projectId));
 ```
 
-Moving a project's status by hand calls `ProjectsRepository.setStatus(projectId, status)` the same way, through the `set_project_status` RPC, which writes the `project_status_events` row in the same transaction. Accepting or declining a job is `JobsRepository.decide(jobId, JobStatus.accepted)`. The project's move to Won or Lost is not Dart's job: a trigger on `jobs` does it and logs the event with reason `job_decision` (JB-2). After a job decision, invalidate the project too, because its status may have changed underneath it.
+Unarchive is the same call in reverse. Both show a toast with **Undo**. Projects have no status in this slice (PJ-3 is postponed), so there is no `set_project_status` yet.
 
 `ref.watch` subscribes and rebuilds. `ref.read` fires an action and does not subscribe. `ref.invalidate` drops the cached value so the next watch refetches.
 
 ### Several steps, or data from another feature
 
-Creating a project needs a client (which `clients` owns), a first job (JB-1: every project has at least one), and sometimes an onsite visit booked in the same step (PJ-1), which `scheduling` owns. That belongs in `ProjectService`:
+Creating a project is one repository call. The form picks a client (or adds one through the existing client sheet), copies the client's address onto the project as the site (editable), and suggests a title. Jobs and visits are not created in this step.
 
 ```dart
-Future<String> createProject(CreateProjectForm form) async {
-  final projectId = await ref.read(projectServiceProvider).createProject(
-        clientId: form.clientId,
-        title: form.title.trim(),
-        siteAddress: form.siteAddress,
-        firstJob: form.firstJob,
-        visit: form.visit, // null unless "Book onsite visit" was filled in
-      );
-  ref.invalidate(projectRowsProvider);
-  ref.invalidate(clientProjectsProvider);
-  ref.invalidate(upcomingAppointmentsProvider);
-  return projectId;
-}
+final projectId = await ref.read(projectsRepositoryProvider).create(command);
+ref.invalidate(projectRowsProvider);
+ref.invalidate(projectRowsPageProvider);
 ```
 
-The service builds a `CreateProjectCommand` and calls one RPC, `create_project`, which inserts the project and its first job and, when a visit is given, the appointment, all in one transaction. The starting status (Lead, or Onsite scheduled) is decided in SQL. If a visit was booked, the service then asks `scheduling` to sync it (see below); a sync failure does not undo the project.
-
-`createProjectFromVisit(appointmentId)` (PJ-2) is the same shape: the RPC reads the appointment's client, copies the client's address onto the project, links the appointment, and starts the project at Onsite scheduled or Onsite done depending on whether the visit has passed.
+The command's `toJson()` keys are the RPC argument names (`Rpc.pClientId` and the rest). The app never sends `business_id`. After a successful create the table switches to Active and the router pushes `/projects/<id>`.
 
 Put logic in `application/` when it:
 
@@ -265,13 +251,15 @@ Notes autosave (ON-1). `NoteEditorController` holds the text and writes through 
 
 Measurements are entered in feet and inches and stored in inches. `Length` in `core/domain/` parses and formats `16' 6"`; the square-foot or linear-foot `quantity` is a generated column, and `Measurement.quantity` mirrors it for the live preview, as with line totals.
 
-Photos (ON-4) are resized in the browser before upload so they finish on a cell connection: longest edge 2048 px, JPEG quality 0.8. `PhotoUploadController` uploads several at once to the `project-photos` storage bucket under `{business_id}/{project_id}/{photo_id}.jpg`, reports progress per file, and inserts the `photos` row only after the upload succeeds. Deleting removes the row and the file through `PhotosRepository.delete`. Storage policies mirror the table's RLS on the path's first segment.
+Photos (ON-4) are resized in the browser before upload so they finish on a cell connection: longest edge 2048 px, JPEG quality 0.8. `JobPhotosController` uploads several at once to the `project-photos` storage bucket under `{business_id}/{project_id}/{photo_id}.jpg`, reports progress per file, and inserts the `photos` row only after the upload succeeds. Deleting removes the row and the file through `PhotosRepository.delete`. Storage policies mirror the table's RLS on the path's first segment.
+
+The gallery watches `JobPhotosView`: saved photos, pending uploads, signed URLs, and the "Uploading n of m" status. `PendingPhoto` is the in-flight tile (processing, uploading, or failed). Both are Freezed view models in `onsite/presentation/models/`; the notifier that updates them is `JobPhotosController` in `controllers/`.
 
 ## What each layer is allowed to do
 
 | Layer | Put it here | Leave it out |
 | --- | --- | --- |
-| `presentation/` | Widgets, route classes, form state, validators, UI-only models | Supabase calls, multi-step workflows |
+| `presentation/` | Widgets, route classes, validators, Freezed view models and form state in `models/` (one type per file), notifiers in `controllers/` | Supabase calls, multi-step workflows |
 | `application/` | Services that order repository calls or combine features | Widgets, `BuildContext` |
 | `data/` | Repositories, command objects, storage uploads, Edge Function invocations | UI state, navigation |
 | `domain/` | Entities, value objects, pure rules (`LineItem.total`, `suggestedTitle`) | Flutter, Supabase, Riverpod |
@@ -282,14 +270,14 @@ A repository or service method with more than two or three parameters takes one 
 
 ## Riverpod
 
-State and dependency injection both go through Riverpod code generation. Annotate a function or class, then run build_runner. The generated `*.g.dart` file creates the provider (`pipeline` becomes `pipelineProvider`).
+State and dependency injection both go through Riverpod code generation. Annotate a function or class, then run build_runner. The generated `*.g.dart` file creates the provider (`projectRows` becomes `projectRowsProvider`).
 
 | Annotation | What you get | Field Notes example |
 | --- | --- | --- |
-| `@riverpod` on a `Future` function | Async provider, disposed when nothing watches it | `clientProjects`, `projectMeasurements` |
-| `@riverpod` with an extra argument | Family provider, one cache per argument | `projectRows(filter)`, `jobLineItems(jobId)` |
-| `@riverpod` on a class extending the generated notifier | Mutable state, usually a form or view selection | `PipelineFilterController`, `NoteEditorController` |
-| `@Riverpod(keepAlive: true)` | Provider that survives after the last listener | `supabase`, `currentUser`, `projectService` |
+| `@riverpod` on a `Future` function | Async provider, disposed when nothing watches it | `allClients`, `project` |
+| `@riverpod` with an extra argument | Family provider, one cache per argument | `projectRows(view)`, `project(projectId)` |
+| `@riverpod` on a class extending the generated notifier | Mutable state, usually a form or view selection | `ProjectsTableController`, `CreateProjectFormController` |
+| `@Riverpod(keepAlive: true)` | Provider that survives after the last listener | `supabase`, `currentUser`, `projectsTableController` |
 
 Widgets that read providers extend `ConsumerWidget` or `ConsumerStatefulWidget`.
 
@@ -317,7 +305,9 @@ Do not edit `*.g.dart`, `*.freezed.dart`, or `*.mocks.dart`. Change the source f
 
 ## Tests
 
-Tests live in `app/test/`, mirroring `app/lib/`, and run with `flutter test`. Nothing in the suite talks to a running Supabase stack or to Google.
+Unit tests live in `app/test/`, mirroring `app/lib/`, and run with `flutter test`. They use mocks and never talk to a running Supabase stack or to Google.
+
+Contract tests live in `app/contract_test/` and hit local Supabase with a real repository and a real `SupabaseClient`. They are not picked up by `flutter test`. See [app/contract_test/README.md](app/contract_test/README.md).
 
 Test doubles come from **mockito**, not from hand-written fakes. `app/test/mocks.dart` carries one annotation for the whole suite and re-exports what `build_runner` generates:
 
@@ -355,6 +345,16 @@ Two Riverpod behaviours trip people up in tests:
 
 Pure rules get plain unit tests with no container: `LineItem.total`, `Length.parse`, `suggestedTitle`, and the start-status rule for create-from-visit.
 
+## Presentation models
+
+Types that describe what a screen draws live in `presentation/models/`, one class per file, as Freezed classes. They are not domain entities and they are not command objects.
+
+Form drafts (`CreateProjectFormState`, `LineFormState`) hold field values and validation errors. View models (`JobPhotosView`, `PendingPhoto`) hold the data a widget needs to render, including derived helpers (`remaining`, `uploadStatus`).
+
+The notifier that mutates the model lives in `presentation/controllers/`. Do not declare a view model or form state in the same file as the controller.
+
+Command objects and SQL-view row types stay in `data/models.dart` next to the repository (`CreateProjectCommand`, `ProjectRow`).
+
 ## Domain models
 
 `Project`, `Job`, `LineItem` and the rest are Freezed classes with `fromJson`. Freezed gives you `copyWith`, equality, and exhaustive cases on the status enums.
@@ -370,9 +370,9 @@ Signed-in sections are branches of one `StatefulShellRoute` in `app/lib/core/rou
 Path strings live in `AppRoutes` (`app/lib/core/routing/app_routes.dart`). The router's `redirect` does two things:
 
 - sends signed-out users to sign-in, from any page (AU-1)
-- sends signed-in users away from sign-in and password reset
+- sends signed-in users without a business to onboarding, and signed-in users with a business away from the public pages and onboarding
 
-`AppRoutes.publicRoutes` lists the pages that work without a session: sign-in and the password-reset pages. The router is built once in a provider and refreshed through `refreshListenable` when `currentUserProvider` changes. It is never rebuilt on each change.
+`AppRoutes.publicRoutes` lists the pages that work without a session: sign-in, sign-up, and check-email. The router is built once in a provider and refreshed through `refreshListenable` when `currentUserProvider` changes. It is never rebuilt on each change.
 
 Routes that take parameters are classes in the feature, not inline `GoRoute`s. Each extends `ParamAppRoute` or `SimpleAppRoute` from `app/lib/core/routing/routing_interfaces.dart` and lives in that feature's `presentation/routes.dart`. `ProjectRoute(projectId)` and `ClientRoute(clientId)` are pushed onto whichever branch the user is in, so opening a project from the Clients tab keeps you in Clients. Settings is a `SimpleAppRoute` reached from the app bar.
 
@@ -382,16 +382,16 @@ Every screen must work in Safari on an iPhone with no sideways scrolling, and wi
 
 ## How a new feature should look
 
-1. Create `app/lib/features/<name>/domain/` with the entities. Use `@freezed` when the type is sent to or from JSON, or when the UI copies it. If another feature needs the type, put it in `app/lib/core/domain/` instead.
+1. Create `app/lib/features/<name>/domain/` with the entities. Use `@freezed` when the type is sent to or from JSON, or when the UI copies it. If another feature needs the type, put it in `app/lib/core/domain/` instead. View models and form drafts are not domain types: they go in `presentation/models/`.
 2. Create `data/<name>_repository.dart`. Take `SupabaseClient` in the constructor. Expose a `@riverpod` provider that reads `supabaseProvider`. Add a `Future` provider per read the UI needs. Add table and column constants to `app/lib/core/database/`.
 3. Add an `application/` service only when a user action needs more than one repository call or another feature's data.
 4. Build the page as a `ConsumerWidget` that composes smaller widgets. Each widget watches the provider it renders.
-5. Keep form drafts and view selections in a notifier under `presentation/controllers/`. Submit through the service or, for a single call, through the repository. Then `ref.invalidate` every provider that displayed the old value.
+5. Put view models and form drafts in `presentation/models/` as `@freezed` classes, one type per file. Keep the notifier that updates them in `presentation/controllers/`. Submit through the service or, for a single call, through the repository. Then `ref.invalidate` every provider that displayed the old value.
 6. Add a class in `presentation/routes.dart` for a page that takes arguments, and the path to `AppRoutes`. A new main tab means a shell branch in `go_router.dart` and a destination in `HomePage`.
 
 Features are built in this order, so each one only depends on what already exists:
 
-1. `auth`, `clients`
+1. `auth`, `business`, `clients`
 2. `pricing`, handed to Moises to start entering prices
 3. `projects` (projects and jobs)
 4. `scheduling`, which needs only clients and can run alongside step 3
@@ -404,9 +404,9 @@ The app talks to Supabase directly. There is no application server; queries, RPC
 
 Schema, RLS policies, triggers and SQL functions live in `supabase/migrations/`. Apply them with `supabase db reset` locally. Rules the database must enforce belong in SQL, called with `supabase.rpc(...)` or run as triggers:
 
-- `create_project` and `create_project_from_visit` create a project with its first job and any visit in one transaction.
-- `set_project_status` changes a status by hand; a trigger on `projects.status` writes every `project_status_events` row, so no path can change status without a time stamp (PJ-3).
-- A trigger on `jobs.status` moves the project to Won when any job is accepted and Lost when every job is declined (JB-2).
+- `create_business` and `redeem_invite` are the only paths that create a membership. `create_invite`, `revoke_invite`, and `remove_member` are owner-only. The client never writes `memberships`, `businesses`, or `invites` directly.
+- `create_project`, `archive_project`, and `unarchive_project` are the only writes to `projects`. There is no delete. Status history (PJ-3) and jobs (JB) are later.
+- Appointments belong to clients, not projects. `project_rows` shows the client's one active appointment read-only.
 - `book_appointment`, `reschedule_appointment` and `cancel_appointment` write the row and mark it `pending`; only `calendar-sync` marks it `synced` or `failed`. Canceled appointments are kept (SC-5).
 - `add_line_item` copies the price item's values and refuses inactive items (PR-4, ES-7).
 

@@ -1,0 +1,46 @@
+abstract final class Rpc {
+  static const createBusiness = 'create_business';
+  static const redeemInvite = 'redeem_invite';
+  static const createInvite = 'create_invite';
+  static const revokeInvite = 'revoke_invite';
+  static const removeMember = 'remove_member';
+  static const removeClient = 'remove_client';
+  static const addAppointment = 'add_appointment';
+  static const updateAppointment = 'update_appointment';
+  static const removeAppointment = 'remove_appointment';
+  static const createProject = 'create_project';
+  static const archiveProject = 'archive_project';
+  static const unarchiveProject = 'unarchive_project';
+  static const addPriceListLine = 'add_price_list_line';
+  static const addCustomLine = 'add_custom_line';
+  static const updateLine = 'update_line';
+  static const reorderLines = 'reorder_lines';
+  static const deleteLine = 'delete_line';
+  static const updateProject = 'update_project';
+  static const setProjectOverhead = 'set_project_overhead';
+
+  static const pName = 'p_name';
+  static const pCode = 'p_code';
+  static const pInviteId = 'p_invite_id';
+  static const pUserId = 'p_user_id';
+  static const pClientId = 'p_client_id';
+  static const pId = 'p_id';
+  static const pStartsAt = 'p_starts_at';
+  static const pDurationMinutes = 'p_duration_minutes';
+  static const pNotes = 'p_notes';
+  static const pTitle = 'p_title';
+  static const pSiteStreet = 'p_site_street';
+  static const pSiteCity = 'p_site_city';
+  static const pSiteState = 'p_site_state';
+  static const pSiteZip = 'p_site_zip';
+  static const pProjectId = 'p_project_id';
+  static const pJobId = 'p_job_id';
+  static const pPriceItemId = 'p_price_item_id';
+  static const pQuantity = 'p_quantity';
+  static const pDescription = 'p_description';
+  static const pPricingType = 'p_pricing_type';
+  static const pPriceCents = 'p_price_cents';
+  static const pOverridePriceCents = 'p_override_price_cents';
+  static const pIds = 'p_ids';
+  static const pOverheadBps = 'p_overhead_bps';
+}

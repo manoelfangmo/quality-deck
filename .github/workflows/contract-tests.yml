@@ -1,0 +1,76 @@
+name: Contract tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: contract-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.6'
+          channel: stable
+          cache: true
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Export local keys
+        run: |
+          eval "$(supabase status -o env)"
+          echo "SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_ANON_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY" >> "$GITHUB_ENV"
+
+      - name: Verify seed
+        run: |
+          count="$(docker exec -i supabase_db_field-notes \
+            psql -U postgres -tAc 'select count(*) from auth.users')"
+          echo "auth.users count=$count"
+          if [ "$count" -lt 5 ]; then
+            echo "Expected at least 5 seeded users, got $count"
+            exit 1
+          fi
+
+      - name: Install Flutter dependencies
+        working-directory: app
+        run: flutter pub get
+
+      - name: Run contract tests
+        working-directory: app
+        timeout-minutes: 10
+        run: |
+          flutter test contract_test/ \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
+            --dart-define=SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY"
+
+      - name: Dump Supabase logs
+        if: failure()
+        run: |
+          docker ps -a --filter name=supabase
+          for c in $(docker ps -aq --filter name=supabase); do
+            echo "===== logs $(docker inspect -f '{{.Name}}' "$c") ====="
+            docker logs "$c" 2>&1 | tail -n 200
+          done
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop

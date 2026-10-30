@@ -1,10 +1,6 @@
 # app
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
+Flutter client for Field Notes. Setup, seeded accounts, and Auth configuration are in the [repository README](../README.md).
 
 A few resources to get you started if this is your first Flutter project:
 
